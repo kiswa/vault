@@ -12,6 +12,8 @@
     </label>
 
     <button @click="signIn">Sign In</button>
+
+    <a @click="signUp">Sign Up</a>
   </div>
 </template>
 
@@ -24,7 +26,11 @@ export default class Login extends Vue {
   public password = '';
 
   public signIn(): void {
-    console.log(this.username, this.password);
+    console.log(this.username, this.password); // tslint:disable-line
+  }
+
+  public signUp(): void {
+    // TODO
   }
 }
 </script>
@@ -33,8 +39,10 @@ export default class Login extends Vue {
 @import '../variables';
 
 .login {
-  border-radius: 5px;
-  box-shadow: 1px 1px 15px 0 rgba($grey, .5);
+  background-color: $white;
+  border: 1px solid $purple;
+  border-radius: 3px;
+  box-shadow: 3px 7px 25px 0 rgba($black, .3);
   display: flex;
   flex-direction: column;
   margin: 2rem auto;
@@ -73,6 +81,20 @@ export default class Login extends Vue {
 
     &:hover {
       background-color: darken($purple, 5%);
+    }
+  }
+
+  a {
+    border: 1px solid $green;
+    border-radius: 3px;
+    color: $green;
+    cursor: pointer;
+    margin-top: 1rem;
+    padding: .5rem 0;
+    transition: all .3s ease;
+
+    &:hover {
+      background-color: darken($white, 2%);
     }
   }
 }

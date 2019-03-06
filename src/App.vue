@@ -9,8 +9,16 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat');
 @import './variables';
 
+html, body {
+  height: 100%;
+}
+
 body {
-  background-color: $white;
+  background: $blue;
+  background: linear-gradient(180deg,
+                              lighten($blue, 3%) 0%,
+                              $blue 35%,
+                              darken($blue, 7%) 100%);
   color: $black;
 }
 
