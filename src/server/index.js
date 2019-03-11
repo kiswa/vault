@@ -19,31 +19,23 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json())
 app.use(compression())
-app.use(
-  jwtMiddleware({ secret: 'super secret key thing - change this' })
-    .unless({ path: ['/login'] })
-)
+app.use(jwtMiddleware({ secret: 'super secret key thing - change this' })
+  .unless({ path: ['/login'] }))
 
 app.use('/', routes)
 
-app.use((req, res, next) => {
-  const err = new Error('Invalid Endpoint')
-  err.status = 404
-
-  next(err)
-})
-
 app.use((err, req, res, next) => {
   const errObj = {
-    message: 'Invalid token',
-    error: (app.get('env') === 'development') ? err : {}
+    status: 'error',
+    data: (app.get('env') === 'development') ? err : {},
+    alerts: ['Invalid Token']
   }
 
   if (err.name === 'UnauthorizedError') {
     return res.status(401).json(errObj)
   }
 
-  errObj.message = err.message
+  errObj.alerts = [err.message]
   return res.status(err.status || 500).json(errObj)
 })
 

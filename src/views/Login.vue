@@ -47,16 +47,16 @@ export default class Login extends Vue {
 
   private http = (this as any).$http;
 
-  public signIn(): void {
-    this.http.post('login', {
+  public async signIn() {
+    const res = await this.http.post('login', {
       username: this.username,
       password: this.password,
-    }, (response: any) => {
-      console.log(response); // tslint:disable-line
     });
+
+    console.log(res.data); //tslint:disable-line
   }
 
-  public signUp(): void {
+  public async signUp() {
     if (!this.isSignUp) {
       this.isSignUp = true;
       return;
@@ -66,16 +66,18 @@ export default class Login extends Vue {
       return;
     }
 
-    this.createAccount();
+    const res = await this.http.post('signup', {
+      username: this.username,
+      password: this.password,
+      verify: this.verifyPassword
+    });
+
+    console.log(res.data);
   }
 
   public resetErrors() {
     this.passwordError = false;
     this.verifyError = false;
-  }
-
-  private createAccount() {
-    console.log('Create account'); // tslint:disable-line
   }
 
   private validateSignUp() {

@@ -1,6 +1,6 @@
 const sqlite = require('sqlite3')
 
-;(() => {
+function up() {
   let db = new sqlite.Database('./pword.db')
 
   db.run('PRAGMA foreign_keys = ON')
@@ -61,4 +61,19 @@ const sqlite = require('sqlite3')
   })
 
   db.close()
-})()
+}
+
+function down() {
+  let db = new sqlite.Database('./pword.db')
+
+  db.serialize(() => {
+    db.run(`DROP TABLE IF EXISTS user`)
+    db.run(`DROP TABLE IF EXISTS pword`)
+  })
+}
+
+module.exports = {
+  up,
+  down
+}
+

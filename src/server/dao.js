@@ -1,10 +1,19 @@
 const sqlite = require('sqlite3').verbose()
+const bcrypt = require('bcrypt')
+
+class ApiResponse {
+  constructor(status = 'error', data = {}, alerts = []) {
+    this.status = status
+    this.data = data
+    this.alerts = alerts
+  }
+}
 
 class DataAccessObject {
 
   constructor(dbPath, options) {
     if (options && options.migrations) {
-      this.runMigrations(options.migrations)
+      this._runMigrations(options.migrations)
     }
 
     this.db = new sqlite.Database(dbPath, err => {
@@ -16,9 +25,39 @@ class DataAccessObject {
     })
   }
 
-  runMigrations(migrations) {
+  async get(sql, params) {
+    const get = await new Promise((resolve, reject) => {
+      this.db.get(sql, params, (err, row) => {
+        if (err) {
+          reject(err)
+        }
+
+        resolve(row)
+      })
+    }).then(res => new ApiResponse('success', res))
+      .catch(err => new ApiResponse('error', err))
+
+    return get
+  }
+
+  async run(sql, params) {
+    const run = await new Promise((resolve, reject) => {
+      this.db.run(sql, params, function(err) {
+        if (err) {
+          reject(err)
+        }
+
+        resolve({ lastId: this.lastID, changes: this.changes })
+      }).then (res => new ApiResponse('success', res))
+        .catch(err => new ApiResponse('error', err))
+    })
+
+    return run
+  }
+
+  _runMigrations(migrations) {
     migrations.forEach(path => {
-      require(path)
+      require(path).up()
     })
   }
 }
