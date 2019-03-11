@@ -9,6 +9,15 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat');
 @import './variables';
 
+html {
+  box-sizing: border-box;
+
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 html, body {
   height: 100%;
 }

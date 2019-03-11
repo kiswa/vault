@@ -8,12 +8,27 @@
 
     <label>
       Password:
-      <input type="password" v-model="password" />
+      <input type="password" @keyup="resetErrors"
+        v-model="password" />
+
+      <span class="error" v-if="passwordError">
+        Password must be at least 12 characters long.
+      </span>
     </label>
 
-    <button @click="signIn">Sign In</button>
+    <label v-if="isSignUp">
+      Verify Password:
+      <input type="password" @keyup="resetErrors"
+        v-model="verifyPassword" />
 
-    <a @click="signUp">Sign Up</a>
+      <span class="error" v-if="verifyError">
+        Verification password does not match original password.
+      </span>
+    </label>
+
+    <button @click="signIn" v-if="!isSignUp">Sign In</button>
+
+    <a @click="signUp" :class="{ active: isSignUp }">Sign Up</a>
   </div>
 </template>
 
@@ -24,13 +39,59 @@ import { Component, Vue } from 'vue-property-decorator';
 export default class Login extends Vue {
   public username = '';
   public password = '';
+  public verifyPassword = '';
+
+  public isSignUp = false;
+  public verifyError = false;
+  public passwordError = false;
+
+  private http = (this as any).$http;
 
   public signIn(): void {
-    console.log(this.username, this.password); // tslint:disable-line
+    this.http.post('login', {
+      username: this.username,
+      password: this.password,
+    }, (response: any) => {
+      console.log(response); // tslint:disable-line
+    });
   }
 
   public signUp(): void {
-    // TODO
+    if (!this.isSignUp) {
+      this.isSignUp = true;
+      return;
+    }
+
+    if (!this.validateSignUp()) {
+      return;
+    }
+
+    this.createAccount();
+  }
+
+  public resetErrors() {
+    this.passwordError = false;
+    this.verifyError = false;
+  }
+
+  private createAccount() {
+    console.log('Create account'); // tslint:disable-line
+  }
+
+  private validateSignUp() {
+    let noErrors = true;
+
+    if (this.password !== this.verifyPassword) {
+      this.verifyError = true;
+      noErrors = false;
+    }
+
+    if (this.password.length < 12) {
+      this.passwordError = true;
+      noErrors = false;
+    }
+
+    return noErrors;
   }
 }
 </script>
@@ -46,6 +107,8 @@ export default class Login extends Vue {
   display: flex;
   flex-direction: column;
   margin: 2rem auto;
+  max-width: 100%;
+  overflow: hidden;
   padding: 2rem;
   width: 20rem;
 
@@ -54,17 +117,23 @@ export default class Login extends Vue {
   }
 
   label {
-    align-items: center;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     margin-bottom: 1rem;
+    text-align: left;
 
     input {
       border: 1px solid $purple;
       border-radius: 3px;
-      max-width: 60%;
       outline: none;
       padding: 3px 5px;
+    }
+
+    .error {
+      color: $error;
+      font-size: .8rem;
+      font-weight: bold;
+      margin-top: 5px;
     }
   }
 
@@ -95,6 +164,16 @@ export default class Login extends Vue {
 
     &:hover {
       background-color: darken($white, 2%);
+    }
+
+    &.active {
+      background-color: $green;
+      border: 1px solid darken($green, 10%);
+      color: $white;
+
+      &:hover {
+        background-color: darken($green, 5%);
+      }
     }
   }
 }
