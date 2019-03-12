@@ -8,7 +8,7 @@ const app = express()
 
 const routes = require('./routes/index')
 
-app.use((req, res, next) => {
+app.use((_, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
   res.header("Access-Control-Allow-Headers",
              "Origin, X-Requested-With, Content-Type, Accept, Authorization")
@@ -20,11 +20,11 @@ app.use((req, res, next) => {
 app.use(bodyParser.json())
 app.use(compression())
 app.use(jwtMiddleware({ secret: 'super secret key thing - change this' })
-  .unless({ path: ['/login'] }))
+  .unless({ path: ['/login', '/signup'] }))
 
 app.use('/', routes)
 
-app.use((err, req, res, next) => {
+app.use((err, _, res) => {
   const errObj = {
     status: 'error',
     data: (app.get('env') === 'development') ? err : {},

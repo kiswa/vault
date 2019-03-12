@@ -1,5 +1,4 @@
 const sqlite = require('sqlite3').verbose()
-const bcrypt = require('bcrypt')
 
 class ApiResponse {
   constructor(status = 'error', data = {}, alerts = []) {
@@ -47,10 +46,10 @@ class DataAccessObject {
           reject(err)
         }
 
-        resolve({ lastId: this.lastID, changes: this.changes })
-      }).then (res => new ApiResponse('success', res))
-        .catch(err => new ApiResponse('error', err))
-    })
+        resolve(true)
+      })
+    }).then (res => new ApiResponse('success', res))
+      .catch(err => new ApiResponse('error', err))
 
     return run
   }
@@ -62,5 +61,8 @@ class DataAccessObject {
   }
 }
 
-module.exports = DataAccessObject
+module.exports = {
+  DataAccessObject,
+  ApiResponse
+}
 

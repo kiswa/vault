@@ -69,10 +69,10 @@ export default class Login extends Vue {
     const res = await this.http.post('signup', {
       username: this.username,
       password: this.password,
-      verify: this.verifyPassword
+      verify: this.verifyPassword,
     });
 
-    console.log(res.data);
+    console.log(res.data); //tslint:disable-line
   }
 
   public resetErrors() {
