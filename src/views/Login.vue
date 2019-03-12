@@ -4,6 +4,10 @@
     <label>
       User Name:
       <input type="text" v-model="username" />
+
+      <span class="error" v-if="usernameError">
+        {{ usernameError }}
+      </span>
     </label>
 
     <label>
@@ -42,6 +46,7 @@ export default class Login extends Vue {
   public verifyPassword = '';
 
   public isSignUp = false;
+  public usernameError = null;
   public verifyError = false;
   public passwordError = false;
 
@@ -72,10 +77,15 @@ export default class Login extends Vue {
       verify: this.verifyPassword,
     });
 
-    console.log(res.data); //tslint:disable-line
+    if (res.data.status === 'error') {
+      this.usernameError = res.data.alerts[0];
+      this.isSignUp = false;
+      return;
+    }
   }
 
   public resetErrors() {
+    this.usernameError = null;
     this.passwordError = false;
     this.verifyError = false;
   }

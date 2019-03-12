@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const path = require('path')
 
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
@@ -8,23 +9,24 @@ const saltRounds = 13
 const DataAccessObject = require('../dao').DataAccessObject
 const ApiResponse = require('../dao').ApiResponse
 
-const dao = new DataAccessObject('../pword.db', {
+const dao = new DataAccessObject(path.resolve(__dirname, '../../../pword.db'), {
   migrations: ['./migrations/v1.0.js'] // Assumes this is run from project root.
-})
-
-router.get('/', (_, res) => {
-  res.json(new ApiResponse('error', {}, ['Invalid Enpdoint']))
 })
 
 router.post('/login', async (req, res) => {
   const uname = req.body.username
   const pword = req.body.password
+  const error = new ApiResponse('error', {}, ['Invalid login information.'])
 
-  const result = await dao.get(`SELECT * FROM user WHERE name=?`, uname)
+  const user = dao.get(`SELECT * FROM user WHERE name = ?`, uname)
 
-  // TODO: Verify password
+  if (user.status === 'error') {
+    return res.json(error)
+  }
 
-  return res.json(result)
+  const match = bcrypt.compareSync(pword, user.data.password)
+
+  return res.json(match ? user : error)
 })
 
 router.post('/signup', async (req, res) => {
@@ -37,48 +39,41 @@ router.post('/signup', async (req, res) => {
      ['Verification password does not match original password.']))
   }
 
-  const exists = await checkExistingUser(uname)
-
-  if (exists) {
-    return exists
+  if (checkExistingUser(uname)) {
+    exists.status = 'error'
+    exists.data = {}
+    return res.json(exists)
   }
 
-  return res.json(createNewUser(uname, pword))
+  return res.json(await createNewUser(uname, pword))
 })
 
-function createNewUser(username, password) {
-  const error = {
-    status: 'error',
-    data: {},
-    alerts: ['Error creating new user.']
-  }
+async function createNewUser(username, password) {
+  return await bcrypt.hash(password, saltRounds).then(hash => {
+    const newUser = dao.run(`INSERT INTO user (name, password)
+                             VALUES (?, ?)`, [username, hash])
+    console.log(`newUser: ${JSON.stringify(newUser)}`)
 
-  return bcrypt.hash(password, saltRounds, async (err, hash) => {
-    if (err) {
-      error.data = err
-      return error
-    }
-
-    const newUser = await dao.run(`INSERT INTO user (name, password)
-      VALUES (?, ?)`, { username, hash })
-    
     if (newUser.status === 'error') {
-      return error
+      return newUser
     }
 
-    return new ApiResponse('success', newUser.data,
-      ['New user created successfully.'])
-  })
+    newUser.alerts = ['New user created successfully.']
+    return newUser
+  }).catch(err => console.log(err))
 }
 
-async function checkExistingUser(uname) {
-  const userExists = await dao.get(`SELECT * FROM user WHERE name=?`, uname)
+function checkExistingUser(uname) {
+  const userExists = dao.get(`SELECT * FROM user WHERE name = ?`, uname)
 
+  console.log(userExists)
   if (userExists.status === 'error') {
-    return
+    return null
   }
 
-  return res.json(new ApiResponse('error', {}, ['User name already in use.']))
+  userExists.alerts = ['User name already in use.']
+  return userExists
 }
 
 module.exports = router
+

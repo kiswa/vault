@@ -1,75 +1,56 @@
-const sqlite = require('sqlite3')
+const Database = require('better-sqlite3')
 
-function up() {
-  let db = new sqlite.Database('./pword.db')
+function up(dbPath) {
+  let db = new Database(dbPath)
+  db.pragma('foreign_keys = ON')
 
-  db.run('PRAGMA foreign_keys = ON')
+  try {
+    const tbl = db.prepare(`SELECT name FROM sqlite_master
+                            WHERE type='table'
+                            AND name='user'`).get()
 
-  db.serialize(() => {
-    db.get(`SELECT name FROM sqlite_master
-            WHERE type='table'
-            AND name='user'`,
-      (err, res) => {
-        if (err) {
-          console.error(err)
-          return
-        }
+    if (!tbl) {
+      console.info('Creating table "user"...')
+      db.prepare(`CREATE TABLE user (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  name TEXT,
+                  password TEXT
+                  )`).run()
+    }
+  } catch(err) {
+    console.error(err)
+  }
 
-        if (!res) {
-          console.info(`Creating table 'user'...`)
-        }
-      })
+  try {
+    const tbl = db.prepare(`SELECT name FROM sqlite_master
+                            WHERE type='table'
+                            AND name='pword'`).get()
 
-    db.run(`CREATE TABLE IF NOT EXISTS user (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            password TEXT
-            )`,
-      (err, ret) => {
-        if (err) {
-          console.error(err)
-        }
-      })
-
-    db.get(`SELECT name FROM sqlite_master
-            WHERE type='table'
-            AND name='pword'`,
-      (err, res) => {
-        if (err) {
-          console.error(err)
-          return
-        }
-
-        if (!res) {
-          console.info(`Creating table 'pword'...`)
-        }
-      })
-
-    db.run(`CREATE TABLE IF NOT EXISTS pword (
-            id INTEGER PRIMARY KEY,
-            user_id INTEGER,
-            product TEXT,
-            name TEXT,
-            password TEXT,
-            FOREIGN KEY(user_id) REFERENCES user(id)
-            )`,
-      (err, ret) => {
-        if (err) {
-          console.error(err)
-        }
-      })
-  })
+    if (!tbl) {
+      console.info('Creating table "pword"...')
+      db.prepare(`CREATE TABLE pword (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  user_id INTEGER,
+                  product TEXT,
+                  name TEXT,
+                  password TEXT,
+                  FOREIGN KEY(user_id) REFERENCES user(id)
+                  )`).run()
+    }
+  } catch(err) {
+    console.error(err)
+  }
 
   db.close()
 }
 
-function down() {
-  let db = new sqlite.Database('./pword.db')
+function down(dbPath) {
+  let db = new Database(dbPath)
 
-  db.serialize(() => {
-    db.run(`DROP TABLE IF EXISTS user`)
-    db.run(`DROP TABLE IF EXISTS pword`)
-  })
+  db.prepare(`DROP TABLE user`).run()
+  db.prepare(`DROP TABLE pword`).run()
+
+  db.close()
 }
 
 module.exports = {

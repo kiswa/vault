@@ -1,4 +1,4 @@
-const sqlite = require('sqlite3').verbose()
+const Database = require('better-sqlite3')
 
 class ApiResponse {
   constructor(status = 'error', data = {}, alerts = []) {
@@ -6,57 +6,56 @@ class ApiResponse {
     this.data = data
     this.alerts = alerts
   }
+
+  success(data) {
+    this.status = 'success'
+    this.data = data
+  }
 }
 
 class DataAccessObject {
-
   constructor(dbPath, options) {
     if (options && options.migrations) {
-      this._runMigrations(options.migrations)
+      this._runMigrations(options.migrations, dbPath)
     }
 
-    this.db = new sqlite.Database(dbPath, err => {
-      if (err) {
-        return console.error(err.message)
+    this.db = new Database(dbPath)
+    console.log(`Connected to database ${dbPath}`)
+  }
+
+  get(sql, params) {
+    const response = new ApiResponse()
+
+    try {
+      const data = this.db.prepare(sql).get(params)
+
+      if (data) {
+        response.success(data)
       }
+    } catch (err) {
+      response.data = err
+    }
 
-      console.log(`Connected to database ${dbPath}`)
-    })
+    return response
   }
 
-  async get(sql, params) {
-    const get = await new Promise((resolve, reject) => {
-      this.db.get(sql, params, (err, row) => {
-        if (err) {
-          reject(err)
-        }
+  run(sql, params) {
+    const response = new ApiResponse()
 
-        resolve(row)
-      })
-    }).then(res => new ApiResponse('success', res))
-      .catch(err => new ApiResponse('error', err))
+    try {
+      const data = this.db.prepare(sql).run(params)
 
-    return get
+      response.success(data)
+    } catch (err) {
+      response.data = err
+    }
+
+    return response
   }
 
-  async run(sql, params) {
-    const run = await new Promise((resolve, reject) => {
-      this.db.run(sql, params, function(err) {
-        if (err) {
-          reject(err)
-        }
-
-        resolve(true)
-      })
-    }).then (res => new ApiResponse('success', res))
-      .catch(err => new ApiResponse('error', err))
-
-    return run
-  }
-
-  _runMigrations(migrations) {
+  _runMigrations(migrations, dbPath) {
     migrations.forEach(path => {
-      require(path).up()
+      require(path).up(dbPath)
     })
   }
 }
