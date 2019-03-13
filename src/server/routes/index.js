@@ -14,6 +14,11 @@ const dao = new DataAccessObject(path.resolve(__dirname, '../../../pword.db'), {
   migrations: ['./migrations/v1.0.js']
 })
 
+router.post('/auth', (req, res) => {
+  // TODO: Not sure yet.
+  return res.json()
+})
+
 router.post('/signin', async (req, res) => {
   const uname = req.body.username
   const pword = req.body.password
@@ -56,6 +61,10 @@ router.post('/signup', async (req, res) => {
   newUser.data = getUserDataWithToken(newUser.data.lastInsertRowid)
 
   return res.json(newUser)
+})
+
+router.get('/data', (req, res) => {
+  return res.json()
 })
 
 function getUserDataWithToken(userId) {

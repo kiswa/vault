@@ -4,15 +4,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-
-@Component({})
-export default class App extends Vue {
-
-}
-</script>
-
 <style lang="scss">
 @import '../node_modules/normalize.css/normalize.css';
 @import url('https://fonts.googleapis.com/css?family=Montserrat');
@@ -20,6 +11,7 @@ export default class App extends Vue {
 
 html {
   box-sizing: border-box;
+
 }
 
 *, *:before, *:after {

@@ -25,6 +25,22 @@ function up(dbPath) {
   try {
     const tbl = db.prepare(`SELECT name FROM sqlite_master
                             WHERE type='table'
+                            AND name='category'`).get()
+
+    if (!tbl) {
+      console.info('Creating table "category"...')
+      db.prepare(`CREATE TABLE category (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  name TEXT
+                  )`).run()
+    }
+  } catch(err) {
+    console.error(err)
+  }
+
+  try {
+    const tbl = db.prepare(`SELECT name FROM sqlite_master
+                            WHERE type='table'
                             AND name='pword'`).get()
 
     if (!tbl) {
@@ -32,10 +48,12 @@ function up(dbPath) {
       db.prepare(`CREATE TABLE pword (
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   user_id INTEGER,
+                  category_id INTEGER,
                   product TEXT,
                   name TEXT,
                   password TEXT,
-                  FOREIGN KEY(user_id) REFERENCES user(id)
+                  FOREIGN KEY(user_id) REFERENCES user(id),
+                  FOREIGN KEY(category_id) REFERENCES category(id)
                   )`).run()
     }
   } catch(err) {

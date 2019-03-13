@@ -99,9 +99,11 @@
               4.67-4.697 0.122-0.078 0.246-0.154 0.371-0.228-0.311
               0.854-0.482 1.776-0.482 2.737 0 1.715 0.54 3.304 1.459
               4.607l-1.904 1.904c-1.639-1.151-3.038-2.621-4.114-4.323z"></path>
+
               <path d="M24 13.813c0-0.849-0.133-1.667-0.378-2.434l-10.056
               10.056c0.768 0.245 1.586 0.378 2.435 0.378 4.418 0
               8-3.582 8-8z"></path>
+
               <path d="M25.938 9.062l-2.168 2.168c0.040 0.025 0.079 0.049 0.118
               0.074 1.88 1.199 3.473 2.805 4.67 4.697-1.197 1.891-2.79
               3.498-4.67 4.697-2.362 1.507-5.090 2.303-7.889 2.303-1.208
@@ -135,36 +137,36 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
-@Component({
-  mounted: () => {
-    const el = document.getElementById('uname');
-
-    if (el) {
-      el.focus();
-    }
-  },
-})
+@Component({})
 export default class Login extends Vue {
   public username = '';
   public password = '';
   public verifyPassword = '';
 
-  public isSignUp = false;
   public usernameError: string | null = null;
-  public verifyError = false;
   public passwordError: string | null = null;
+  public verifyError = false;
+  public isSignUp = false;
 
   public passwordType = 'password';
   public passwordVerifyType = 'password';
 
   private http = (this as any).$http;
 
+  public mounted() {
+    const el = document.getElementById('uname');
+
+    if (el) {
+      el.focus();
+    }
+  }
+
   public async signIn() {
     if (!this.validateSignIn()) {
       return;
     }
 
-    const {data} = await this.http.post('signin', {
+    const { data } = await this.http.post('signin', {
       username: this.username,
       password: this.password,
     });
@@ -174,8 +176,7 @@ export default class Login extends Vue {
       return;
     }
 
-    localStorage.setItem('pwjwt', data.data.token);
-    this.$router.push('home');
+    this.redirectHome(data.data.token);
   }
 
   public async signUp() {
@@ -193,18 +194,20 @@ export default class Login extends Vue {
       return;
     }
 
-    const res = await this.http.post('signup', {
+    const { data } = await this.http.post('signup', {
       username: this.username,
       password: this.password,
       verify: this.verifyPassword,
     });
 
-    if (res.data.status === 'error') {
-      this.usernameError = res.data.alerts[0];
+    if (data.status === 'error') {
+      this.usernameError = data.alerts[0];
       this.isSignUp = false;
 
       return;
     }
+
+    this.redirectHome(data.data.token);
   }
 
   public togglePassword() {
@@ -223,6 +226,14 @@ export default class Login extends Vue {
     this.usernameError = null;
     this.passwordError = null;
     this.verifyError = false;
+  }
+
+  private redirectHome(token: string) {
+    localStorage.setItem('pwjwt', token);
+    this.http.defaults.headers.common.Authorization =
+      'Bearer ' + token;
+
+    this.$router.push('home');
   }
 
   private validateSignIn() {
