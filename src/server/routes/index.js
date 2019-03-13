@@ -11,7 +11,7 @@ const DataAccessObject = require('../dao').DataAccessObject
 const ApiResponse = require('../dao').ApiResponse
 
 const dao = new DataAccessObject(path.resolve(__dirname, '../../../pword.db'), {
-  migrations: ['./migrations/v1.0.js'] // Assumes this is run from project root.
+  migrations: ['./migrations/v1.0.js']
 })
 
 router.post('/signin', async (req, res) => {
@@ -28,7 +28,7 @@ router.post('/signin', async (req, res) => {
   const match = bcrypt.compareSync(pword, user.data.password)
 
   if (match) {
-    user.data = { id: user.data.id, token }
+    user.data = getUserDataWithToken(user.data.id)
     return res.json(user)
   }
 
@@ -40,25 +40,37 @@ router.post('/signup', async (req, res) => {
   const pword = req.body.password
   const vPword = req.body.verify
 
+  const error = new ApiResponse()
+
   if (pword !== vPword) {
-    return res.json(new ApiResponse('error', {},
-     ['Verification password does not match original password.']))
+    error.alerts = ['Verification password does not match original password.']
+    return res.json(error)
   }
 
   if (checkExistingUser(uname)) {
-    exists.status = 'error'
-    exists.data = {}
-    return res.json(exists)
+    error.alerts = [`The user name '${uname}' is taken.`]
+    return res.json(error)
   }
 
-  return res.json(await createNewUser(uname, pword))
+  const newUser = await createNewUser(uname, pword)
+  newUser.data = getUserDataWithToken(newUser.data.lastInsertRowid)
+
+  return res.json(newUser)
 })
+
+function getUserDataWithToken(userId) {
+  const token = jwt.sign({ id: userId }, SECRET,
+                         { algorithm: 'HS512', expiresIn: '3 hours' })
+
+  dao.run(`UPDATE user SET token = ? WHERE id = ?`, [token, userId])
+
+  return { id: userId, token }
+}
 
 async function createNewUser(username, password) {
   return await bcrypt.hash(password, saltRounds).then(hash => {
     const newUser = dao.run(`INSERT INTO user (name, password)
                              VALUES (?, ?)`, [username, hash])
-    console.log(`newUser: ${JSON.stringify(newUser)}`)
 
     if (newUser.status === 'error') {
       return newUser
@@ -72,7 +84,6 @@ async function createNewUser(username, password) {
 function checkExistingUser(uname) {
   const userExists = dao.get(`SELECT * FROM user WHERE name = ?`, uname)
 
-  console.log(userExists)
   if (userExists.status === 'error') {
     return null
   }

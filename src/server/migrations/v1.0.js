@@ -14,7 +14,8 @@ function up(dbPath) {
       db.prepare(`CREATE TABLE user (
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   name TEXT,
-                  password TEXT
+                  password TEXT,
+                  token TEXT
                   )`).run()
     }
   } catch(err) {
