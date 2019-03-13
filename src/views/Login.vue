@@ -3,7 +3,7 @@
     <h1>P-Word</h1>
     <label>
       User Name:
-      <input type="text" v-model="username" />
+      <input type="text" id="uname" v-model="username" />
 
       <span class="error" v-if="usernameError">
         {{ usernameError }}
@@ -16,7 +16,7 @@
         v-model="password" />
 
       <span class="error" v-if="passwordError">
-        Password must be at least 12 characters long.
+       {{ passwordError }} 
       </span>
     </label>
 
@@ -33,27 +33,41 @@
     <button @click="signIn" v-if="!isSignUp">Sign In</button>
 
     <a @click="signUp" :class="{ active: isSignUp }">Sign Up</a>
+
+    <a @click="resetErrors(); isSignUp = false" v-if="isSignUp">Cancel</a>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
-@Component({})
+@Component({
+  mounted: () => {
+    const el = document.getElementById('uname');
+
+    if (el) {
+      el.focus();
+    }
+  },
+})
 export default class Login extends Vue {
   public username = '';
   public password = '';
   public verifyPassword = '';
 
   public isSignUp = false;
-  public usernameError = null;
+  public usernameError: string | null = null;
   public verifyError = false;
-  public passwordError = false;
+  public passwordError: string | null = null;
 
   private http = (this as any).$http;
 
   public async signIn() {
-    const res = await this.http.post('login', {
+    if (!this.validateSignIn()) {
+      return;
+    }
+
+    const res = await this.http.post('signin', {
       username: this.username,
       password: this.password,
     });
@@ -62,6 +76,8 @@ export default class Login extends Vue {
   }
 
   public async signUp() {
+    this.resetErrors();
+
     if (!this.isSignUp) {
       this.isSignUp = true;
       return;
@@ -86,12 +102,32 @@ export default class Login extends Vue {
 
   public resetErrors() {
     this.usernameError = null;
-    this.passwordError = false;
+    this.passwordError = null;
     this.verifyError = false;
+  }
+
+  private validateSignIn() {
+    let noErrors = true;
+
+    if (this.username.length < 1) {
+      this.usernameError = 'User name is required.';
+      noErrors = false;
+    }
+
+    if (this.password.length < 1) {
+      this.passwordError = 'Password is required.';
+      noErrors = false;
+    }
+
+    return noErrors;
   }
 
   private validateSignUp() {
     let noErrors = true;
+
+    if (this.username.length < 1) {
+      this.usernameError = 'User name is required.';
+    }
 
     if (this.password !== this.verifyPassword) {
       this.verifyError = true;
@@ -99,7 +135,7 @@ export default class Login extends Vue {
     }
 
     if (this.password.length < 12) {
-      this.passwordError = true;
+      this.passwordError = 'Password must be at least 12 characters long.';
       noErrors = false;
     }
 
@@ -137,7 +173,6 @@ export default class Login extends Vue {
     input {
       border: 1px solid $purple;
       border-radius: 3px;
-      outline: none;
       padding: 3px 5px;
     }
 

@@ -31,6 +31,11 @@ body {
   color: $black;
 }
 
+input {
+  background-color: $white;
+  outline: none;
+}
+
 #app {
   font-family: 'Montserrat', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

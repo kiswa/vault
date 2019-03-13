@@ -5,6 +5,7 @@ const path = require('path')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const saltRounds = 13
+const SECRET = process.env.SECRET || 'super secret key thing - change this'
 
 const DataAccessObject = require('../dao').DataAccessObject
 const ApiResponse = require('../dao').ApiResponse
@@ -13,7 +14,7 @@ const dao = new DataAccessObject(path.resolve(__dirname, '../../../pword.db'), {
   migrations: ['./migrations/v1.0.js'] // Assumes this is run from project root.
 })
 
-router.post('/login', async (req, res) => {
+router.post('/signin', async (req, res) => {
   const uname = req.body.username
   const pword = req.body.password
   const error = new ApiResponse('error', {}, ['Invalid login information.'])
@@ -26,7 +27,12 @@ router.post('/login', async (req, res) => {
 
   const match = bcrypt.compareSync(pword, user.data.password)
 
-  return res.json(match ? user : error)
+  if (match) {
+    user.data = { id: user.data.id, token }
+    return res.json(user)
+  }
+
+  return res.json(error)
 })
 
 router.post('/signup', async (req, res) => {

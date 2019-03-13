@@ -4,6 +4,7 @@ const compression = require('compression')
 const jwtMiddleware = require('express-jwt')
 
 const PORT = process.env.PORT || 3128
+const SECRET = process.env.SECRET || 'super secret key thing - change this'
 const app = express()
 
 const routes = require('./routes/index')
@@ -19,8 +20,10 @@ app.use((_, res, next) => {
 
 app.use(bodyParser.json())
 app.use(compression())
-app.use(jwtMiddleware({ secret: 'super secret key thing - change this' })
-  .unless({ path: ['/login', '/signup'] }))
+app.use(jwtMiddleware({
+  secret: SECRET,
+  requestProperty: 'auth'
+}).unless({ path: ['/signin', '/signup'] }))
 
 app.use('/', routes)
 
@@ -42,4 +45,3 @@ app.use((err, _, res) => {
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`)
 })
-
