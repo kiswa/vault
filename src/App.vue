@@ -20,7 +20,6 @@ export default class App extends Vue {
 
 html {
   box-sizing: border-box;
-
 }
 
 *, *:before, *:after {

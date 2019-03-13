@@ -169,12 +169,12 @@ export default class Login extends Vue {
       password: this.password,
     });
 
-    console.log(data); // tslint:disable-line
     if (data.status !== 'success') {
       this.passwordError = data.alerts[0];
       return;
     }
 
+    localStorage.setItem('pwjwt', data.data.token);
     this.$router.push('home');
   }
 
