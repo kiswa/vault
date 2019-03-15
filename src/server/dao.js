@@ -29,10 +29,14 @@ class DataAccessObject {
     try {
       const data = this.db.prepare(sql).get(params)
 
-      if (data) {
-        response.success(data)
+      response.success(data)
+
+      if (!data) {
+        response.data = {}
+        response.alerts.push('No results.')
       }
     } catch (err) {
+      console.log(err)
       response.data = err
     }
 

@@ -1,6 +1,11 @@
 <template>
   <div class="container">
+    <div class="add">
+      <h2>Add to your vault</h2>
+    </div>
 
+    <div class="display">
+    </div>
   </div>
 </template>
 
@@ -10,7 +15,7 @@ import { Route } from 'vue-router';
 
 @Component({
   beforeRouteEnter: (to: Route, from: Route, next: any) => {
-    const jwt = localStorage.getItem('pwjwt');
+    const jwt = localStorage.getItem('vjwt');
 
     if (!jwt) {
       next((vm: Home) => {
@@ -34,8 +39,13 @@ export default class Home extends Vue {
   private http = (this as any).$http;
 
   public created() {
-    const jwt = localStorage.getItem('pwjwt');
+    const jwt = localStorage.getItem('vjwt');
     this.http.defaults.headers.common.Authorization = 'Bearer ' + jwt;
+
+    const name = localStorage.getItem('name');
+    if (name) {
+      document.title = `vault - ${name}`;
+    }
   }
 
   public mounted() {
@@ -50,3 +60,31 @@ export default class Home extends Vue {
 
 }
 </script>
+
+<style lang="scss">
+@import '../variables';
+
+.container {
+  margin: 0 auto;
+  max-width: 1200px;
+
+  .add,
+  .display {
+    background: $white;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),
+                0 1px 5px 0 rgba(0, 0, 0, .12),
+                0 3px 1px -2px rgba(0, 0, 0, .2);
+    min-height: 10rem;
+
+    margin-bottom: 1rem;
+  }
+
+  .add {
+    h2 {
+      border-bottom: 1px solid lighten($black, 60%);
+      margin: 0;
+      padding: 1rem;
+    }
+  }
+}
+</style>

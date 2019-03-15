@@ -41,11 +41,11 @@ function up(dbPath) {
   try {
     const tbl = db.prepare(`SELECT name FROM sqlite_master
                             WHERE type='table'
-                            AND name='pword'`).get()
+                            AND name='vault'`).get()
 
     if (!tbl) {
-      console.info('Creating table "pword"...')
-      db.prepare(`CREATE TABLE pword (
+      console.info('Creating table "vault"...')
+      db.prepare(`CREATE TABLE vault (
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   user_id INTEGER,
                   category_id INTEGER,
@@ -67,7 +67,8 @@ function down(dbPath) {
   let db = new Database(dbPath)
 
   db.prepare(`DROP TABLE user`).run()
-  db.prepare(`DROP TABLE pword`).run()
+  db.prepare(`DROP TABLE category`).run()
+  db.prepare(`DROP TABLE vault`).run()
 
   db.close()
 }

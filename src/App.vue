@@ -42,5 +42,6 @@ input {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  padding: 1rem;
 }
 </style>

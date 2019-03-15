@@ -116,7 +116,7 @@ export default class Login extends Vue {
       return;
     }
 
-    this.redirectHome(data.data.token);
+    this.redirectHome(data.data.token, data.data.name);
   }
 
   public async signUp() {
@@ -147,7 +147,7 @@ export default class Login extends Vue {
       return;
     }
 
-    this.redirectHome(data.data.token);
+    this.redirectHome(data.data.token, data.data.name);
   }
 
   public togglePassword() {
@@ -168,8 +168,10 @@ export default class Login extends Vue {
     this.verifyError = false;
   }
 
-  private redirectHome(token: string) {
-    localStorage.setItem('pwjwt', token);
+  private redirectHome(token: string, name: string) {
+    localStorage.setItem('vjwt', token);
+    localStorage.setItem('name', name);
+
     this.http.defaults.headers.common.Authorization =
       'Bearer ' + token;
 

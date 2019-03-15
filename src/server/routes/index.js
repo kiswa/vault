@@ -15,8 +15,7 @@ const dao = new DataAccessObject(path.resolve(__dirname, '../../../pword.db'), {
 })
 
 router.post('/auth', (req, res) => {
-  // TODO: Not sure yet.
-  return res.json()
+  return res.json(new ApiResponse('success'))
 })
 
 router.post('/signin', async (req, res) => {
@@ -64,16 +63,21 @@ router.post('/signup', async (req, res) => {
 })
 
 router.get('/data', (req, res) => {
-  return res.json()
+  const data = dao.get(`SELECT * FROM vault
+                        JOIN category ON category.id = vault.category_id
+                        JOIN user ON user.id = vault.user_id
+                        WHERE user.id = ?`, req.auth.id)
+
+  return res.json(data)
 })
 
 function getUserDataWithToken(userId) {
   const token = jwt.sign({ id: userId }, SECRET,
                          { algorithm: 'HS512', expiresIn: '3 hours' })
 
-  dao.run(`UPDATE user SET token = ? WHERE id = ?`, [token, userId])
+  const user = dao.get(`SELECT * FROM user WHERE id = ?`, userId)
 
-  return { id: userId, token }
+  return { id: userId, name: user.data.name, token }
 }
 
 async function createNewUser(username, password) {
