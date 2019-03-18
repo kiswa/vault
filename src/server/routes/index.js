@@ -10,11 +10,11 @@ const SECRET = process.env.SECRET || 'super secret key thing - change this'
 const DataAccessObject = require('../dao').DataAccessObject
 const ApiResponse = require('../dao').ApiResponse
 
-const dao = new DataAccessObject(path.resolve(__dirname, '../../../pword.db'), {
+const dao = new DataAccessObject(path.resolve(__dirname, '../../vault.db'), {
   migrations: ['./migrations/v1.0.js']
 })
 
-router.post('/auth', (req, res) => {
+router.post('/auth', (_, res) => {
   return res.json(new ApiResponse('success'))
 })
 

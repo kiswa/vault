@@ -60,22 +60,25 @@
       </label>
     </transition>
 
-    <button @click="signIn" v-if="!isSignUp">
+    <button @click="signIn" :disabled="isLoading" v-if="!isSignUp">
       Sign In
     </button>
 
-    <a role="button" @click="signUp" :class="{ active: isSignUp }">
+    <button @click="signUp" :disabled="isLoading"
+      :class="{ active: isSignUp }" class="secondary">
       Sign Up
-    </a>
+    </button>
 
-    <a role="button" @click="resetErrors(); isSignUp = false" v-if="isSignUp">
+    <button @click="resetErrors(); isSignUp = false" v-if="isSignUp"
+            class="secondary">
       Cancel
-    </a>
+    </button>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { Notification } from '@/components/Notifications';
 
 @Component({})
 export default class Login extends Vue {
@@ -87,11 +90,13 @@ export default class Login extends Vue {
   public passwordError: string | null = null;
   public verifyError = false;
   public isSignUp = false;
+  public isLoading = false;
 
   public passwordType = 'password';
   public passwordVerifyType = 'password';
 
   private http = (this as any).$http;
+  private eb = (this as any).$eventBus;
 
   public mounted() {
     const el = document.getElementById('uname');
@@ -106,13 +111,20 @@ export default class Login extends Vue {
       return;
     }
 
+    this.isLoading = true;
     const { data } = await this.http.post('signin', {
       username: this.username,
       password: this.password,
     });
 
+    data.alerts.forEach((alert: string) => {
+      this.eb.$emit('notify', { type: data.status, message: alert });
+    });
+
     if (data.status !== 'success') {
       this.passwordError = data.alerts[0];
+      this.isLoading = false;
+
       return;
     }
 
@@ -134,6 +146,7 @@ export default class Login extends Vue {
       return;
     }
 
+    this.isLoading = true;
     const { data } = await this.http.post('signup', {
       username: this.username,
       password: this.password,
@@ -143,6 +156,7 @@ export default class Login extends Vue {
     if (data.status === 'error') {
       this.usernameError = data.alerts[0];
       this.isSignUp = false;
+      this.isLoading = false;
 
       return;
     }
@@ -327,31 +341,26 @@ export default class Login extends Vue {
     &:hover {
       background-color: darken($purple, 5%);
     }
-  }
 
-  a {
-    border: 1px solid $green;
-    border-radius: 3px;
-    color: $green;
-    cursor: pointer;
-    margin-top: 1rem;
-    padding: .5rem 0;
-    transition: all .3s ease;
-
-    &:hover {
-      background-color: darken($white, 2%);
-    }
-
-    &.active {
-      background-color: $green;
-      border: 1px solid darken($green, 10%);
-      color: $white;
+    &.secondary {
+      background-color: $white;
+      border-color: $green;
+      color: $green;
 
       &:hover {
-        background-color: darken($green, 5%);
+        background-color: darken($white, 2%);
+      }
+
+      &.active {
+        background-color: $green;
+        border: 1px solid darken($green, 10%);
+        color: $white;
+
+        &:hover {
+          background-color: darken($green, 5%);
+        }
       }
     }
   }
 }
 </style>
-

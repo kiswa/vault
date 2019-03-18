@@ -1,8 +1,21 @@
 <template>
   <div id="app">
     <router-view/>
+
+    <notifications></notifications>
   </div>
 </template>
+
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
+
+import { Notifications, Notification } from './components/Notifications';
+
+@Component({})
+export default class App extends Vue {
+}
+</script>
+
 
 <style lang="scss">
 @import '../node_modules/normalize.css/normalize.css';
@@ -11,7 +24,6 @@
 
 html {
   box-sizing: border-box;
-
 }
 
 *, *:before, *:after {

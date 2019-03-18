@@ -9,6 +9,7 @@ Vue.config.productionTip = false;
 const api = axios.create({ baseURL: 'http://localhost:3128' });
 
 Vue.prototype.$http = api;
+Vue.prototype.$eventBus = new Vue();
 
 new Vue({
   router,
