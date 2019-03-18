@@ -10,7 +10,7 @@ const SECRET = process.env.SECRET || 'super secret key thing - change this'
 const DataAccessObject = require('../dao').DataAccessObject
 const ApiResponse = require('../dao').ApiResponse
 
-const dao = new DataAccessObject(path.resolve(__dirname, '../../vault.db'), {
+const dao = new DataAccessObject(path.resolve(__dirname, '../../../vault.db'), {
   migrations: ['./migrations/v1.0.js']
 })
 
@@ -29,7 +29,8 @@ router.post('/signin', async (req, res) => {
     return res.json(error)
   }
 
-  const match = bcrypt.compareSync(pword, user.data.password)
+  const match = await bcrypt.compare(pword, user.data.password)
+    .then(matched => matched).catch(() => false);
 
   if (match) {
     user.data = getUserDataWithToken(user.data.id)
@@ -97,7 +98,7 @@ async function createNewUser(username, password) {
 function checkExistingUser(uname) {
   const userExists = dao.get(`SELECT * FROM user WHERE name = ?`, uname)
 
-  if (userExists.status === 'error') {
+  if (userExists.alerts[0] === 'No results.') {
     return null
   }
 

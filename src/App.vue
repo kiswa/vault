@@ -9,13 +9,16 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
-import { Notifications, Notification } from './components/Notifications';
+import Notifications from '@/components/Notifications.vue';
 
-@Component({})
+@Component({
+  components: {
+    Notifications,
+  },
+})
 export default class App extends Vue {
 }
 </script>
-
 
 <style lang="scss">
 @import '../node_modules/normalize.css/normalize.css';

@@ -49,7 +49,6 @@ function up(dbPath) {
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   user_id INTEGER,
                   category_id INTEGER,
-                  product TEXT,
                   name TEXT,
                   password TEXT,
                   FOREIGN KEY(user_id) REFERENCES user(id),

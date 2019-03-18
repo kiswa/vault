@@ -78,7 +78,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { Notification } from '@/components/Notifications';
 
 @Component({})
 export default class Login extends Vue {

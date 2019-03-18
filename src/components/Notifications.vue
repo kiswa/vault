@@ -1,6 +1,6 @@
 <template>
   <div id="notifications-container">
-    <div v-for="note in notifications" :key="note" :class="note.type">
+    <div v-for="note in notifications" :key="note.message" :class="note.type">
       {{ note.message }}
     </div>
   </div>
@@ -9,14 +9,10 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
-export interface Notification {
-  type: string;
-  message: string;
-}
+import { Notification } from '@/models/notification';
 
 @Component({})
 export default class Notifications extends Vue {
-
   private eb = (this as any).$eventBus;
   private notifications: Notification[] = [];
 
@@ -39,5 +35,4 @@ export default class Notifications extends Vue {
 </script>
 
 <style lang="scss" scoped>
-
 </style>

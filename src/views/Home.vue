@@ -13,6 +13,12 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { Route } from 'vue-router';
 
+interface VaultData {
+  category: string;
+  name: string;
+  password: string;
+}
+
 @Component({
   beforeRouteEnter: (to: Route, from: Route, next: any) => {
     const jwt = localStorage.getItem('vjwt');
@@ -36,6 +42,8 @@ import { Route } from 'vue-router';
   },
 })
 export default class Home extends Vue {
+  public data: VaultData[] = [];
+
   private http = (this as any).$http;
 
   public created() {
@@ -55,7 +63,6 @@ export default class Home extends Vue {
   public async getUserData() {
     const { data } = await this.http.get('data');
 
-    console.log(data); // tslint:disable-line
   }
 
 }
