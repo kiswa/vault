@@ -1,14 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const path = require('path')
-
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
-const saltRounds = 13
-const SECRET = process.env.SECRET || 'super secret key thing - change this'
-
 const DataAccessObject = require('../dao').DataAccessObject
 const ApiResponse = require('../dao').ApiResponse
+
+const {
+  router, path, jwt, bcrypt, saltRounds, SECRET
+} = require('../config.js')
 
 const dao = new DataAccessObject(path.resolve(__dirname, '../../../vault.db'), {
   migrations: ['./migrations/v1.0.js']
@@ -34,6 +29,8 @@ router.post('/signin', async (req, res) => {
 
   if (match) {
     user.data = getUserDataWithToken(user.data.id)
+    user.alerts.push('Welcome back!')
+
     return res.json(user)
   }
 
@@ -61,15 +58,6 @@ router.post('/signup', async (req, res) => {
   newUser.data = getUserDataWithToken(newUser.data.lastInsertRowid)
 
   return res.json(newUser)
-})
-
-router.get('/data', (req, res) => {
-  const data = dao.get(`SELECT * FROM vault
-                        JOIN category ON category.id = vault.category_id
-                        JOIN user ON user.id = vault.user_id
-                        WHERE user.id = ?`, req.auth.id)
-
-  return res.json(data)
 })
 
 function getUserDataWithToken(userId) {
@@ -102,7 +90,7 @@ function checkExistingUser(uname) {
     return null
   }
 
-  userExists.alerts = ['User name already in use.']
+  userExists.alerts = ['User name not available.']
   return userExists
 }
 

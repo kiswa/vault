@@ -1,13 +1,14 @@
-const express = require('express')
+const { express, SECRET } = require('./config.js')
+
 const bodyParser = require('body-parser')
 const compression = require('compression')
 const jwtMiddleware = require('express-jwt')
 
 const PORT = process.env.PORT || 3128
-const SECRET = process.env.SECRET || 'super secret key thing - change this'
 const app = express()
 
 const routes = require('./routes/index')
+const userRoutes = require('./routes/user')
 
 app.use((_, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
@@ -20,12 +21,14 @@ app.use((_, res, next) => {
 
 app.use(bodyParser.json())
 app.use(compression())
+
 app.use(jwtMiddleware({
   secret: SECRET,
   requestProperty: 'auth'
 }).unless({ path: ['/signin', '/signup'] }))
 
 app.use('/', routes)
+app.use('/user/', userRoutes)
 
 app.use((err, _, res) => {
   const errObj = {

@@ -3,18 +3,27 @@
     <nav>
       <div class="logo">
         <img src="logo.svg">
-        vault
+        <h1>vault</h1>
       </div>
 
-      <div>
-        <button @click="signOut()">
-          Sign Out
-        </button>
-      </div>
+      <button @click="signOut()">
+        Sign Out
+      </button>
     </nav>
 
     <main>
+      <add-edit></add-edit>
+
+      <div class="list">
+        <!-- TODO: Make component. -->
+        <h2>Stored Credentials</h2>
+
+        <div v-if="data.length === 0">
+          No entries found.
+        </div>
+      </div>
     </main>
+
   </div>
 </template>
 
@@ -22,13 +31,20 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { Route } from 'vue-router';
 
+import AddEdit from '@/components/AddEdit.vue';
+
 interface VaultData {
+  product: string;
   category: string;
   name: string;
   password: string;
 }
 
 @Component({
+  components: {
+    AddEdit,
+  },
+
   beforeRouteEnter: (to: Route, from: Route, next: any) => {
     const jwt = localStorage.getItem('vjwt');
 
@@ -71,14 +87,19 @@ export default class Home extends Vue {
   }
 
   public async getUserData() {
-    const { data } = await this.http.get('data');
+    const { data } = await this.http.get('user/data');
 
+    console.log(data); // tslint:disable-line
   }
 
   public signOut() {
     localStorage.removeItem('vjwt');
     localStorage.removeItem('name');
 
+    this.eb.$emit('notify', {
+      type: 'info',
+      message: 'You have been signed out.',
+    });
     this.$router.push('/');
   }
 }
@@ -97,6 +118,11 @@ export default class Home extends Vue {
     height: 4rem;
     justify-content: space-between;
 
+    h1 {
+      font-size: 2.5rem;
+      margin-left: -1rem;
+    }
+
     .logo {
       align-items: center;
       display: flex;
@@ -111,7 +137,7 @@ export default class Home extends Vue {
       color: darken($purple, 15%);
       cursor: pointer;
       outline: none;
-      padding: .5rem;
+      padding: .5rem .75rem;
       transition: all .3s ease;
 
       &:hover {
@@ -125,30 +151,66 @@ export default class Home extends Vue {
   }
 
   main {
-    background: $white;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),
-                0 1px 5px 0 rgba(0, 0, 0, .12),
-                0 3px 1px -2px rgba(0, 0, 0, .2);
+    align-items: flex-start;
+    display: flex;
+    justify-content: space-between;
     margin: 2rem 0;
-    min-height: 10rem;
-  }
 
-  .add,
-  .display {
-    background: $white;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),
-                0 1px 5px 0 rgba(0, 0, 0, .12),
-                0 3px 1px -2px rgba(0, 0, 0, .2);
-    min-height: 10rem;
+    button,
+    input {
+      background-color: $white;
+      border: 1px solid darken($purple, 5%);
+      border-radius: 3px;
+      cursor: pointer;
+      outline: none;
+      padding: .5rem;
+      transition: all .3s ease;
+    }
 
-    margin-bottom: 1rem;
-  }
+    button {
+      align-self: center;
+      background-color: $purple;
+      color: $white;
+      width: 33%;
 
-  .add {
-    h2 {
-      border-bottom: 1px solid lighten($black, 60%);
-      margin: 0;
-      padding: 1rem;
+      &:hover {
+        background-color: darken($purple, 5%);
+      }
+
+      &:active {
+        background-color: darken($purple, 15%);
+      }
+    }
+
+    input {
+      cursor: default;
+      max-width: 60%;
+      padding: 5px 5px 3px;
+    }
+
+    .add,
+    .list {
+      background: $white;
+      border-radius: 3px;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),
+                  0 1px 5px 0 rgba(0, 0, 0, .12),
+                  0 3px 1px -2px rgba(0, 0, 0, .2);
+      margin-bottom: 1rem;
+
+      h2 {
+        border-bottom: 1px solid lighten($black, 60%);
+        margin: 0;
+        padding: 1rem;
+      }
+    }
+
+    .list {
+      flex: 1;
+      margin-left: 1rem;
+
+      div {
+        padding: 1rem;
+      }
     }
   }
 }

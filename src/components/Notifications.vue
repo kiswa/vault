@@ -1,11 +1,13 @@
 <template>
   <div id="notifications-container" v-if="notifications.length">
     <transition-group name="collapse">
-      <div v-for="note in notifications" :key="note"
+      <div v-for="note in notifications" :key="note.message"
           class="note" :class="note.type" @click="removeNotification(note)">
-        <header v-if="note.title.length > 0">{{ note.title }}</header>
+        <header v-if="note.title && note.title.length > 0">
+          {{ note.title }}
+        </header>
 
-        <div v-if="note.message.length > 0"> {{ note.message }}</div>
+        <div v-if="note.message.length > 0">{{ note.message }}</div>
       </div>
     </transition-group>
   </div>
@@ -26,15 +28,13 @@ export default class Notifications extends Vue {
       this.notifications.push(data);
 
       setTimeout(() => {
-        // this.removeNotification(data);
+        this.removeNotification(data);
       }, 3000);
     });
   }
 
   private removeNotification(item: Notification) {
     const index = this.notifications.findIndex((note) => note === item);
-
-    console.log(index); // tslint:disable-line
 
     this.notifications.splice(index, 1);
   }

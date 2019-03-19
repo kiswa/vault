@@ -116,9 +116,7 @@ export default class Login extends Vue {
       password: this.password,
     });
 
-    data.alerts.forEach((alert: string) => {
-      this.eb.$emit('notify', { type: data.status, message: alert });
-    });
+    this.notifyAlerts(data.status, data.alerts);
 
     if (data.status !== 'success') {
       this.passwordError = data.alerts[0];
@@ -152,6 +150,8 @@ export default class Login extends Vue {
       verify: this.verifyPassword,
     });
 
+    this.notifyAlerts(data.status, data.alerts);
+
     if (data.status === 'error') {
       this.usernameError = data.alerts[0];
       this.isSignUp = false;
@@ -179,6 +179,12 @@ export default class Login extends Vue {
     this.usernameError = null;
     this.passwordError = null;
     this.verifyError = false;
+  }
+
+  private notifyAlerts(status: string, alerts: string[]) {
+    alerts.forEach((alert: string) => {
+      this.eb.$emit('notify', { type: status, message: alert });
+    });
   }
 
   private redirectHome(token: string, name: string) {
@@ -303,6 +309,7 @@ export default class Login extends Vue {
       }
 
       .password-toggle-icon {
+        cursor: pointer;
         height: 18px;
         fill: $purple;
         position: absolute;

@@ -1,7 +1,7 @@
 
 export interface Notification {
   type: string;
-  title: string;
+  title?: string;
   message: string;
 }
 
