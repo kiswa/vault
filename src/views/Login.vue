@@ -315,7 +315,7 @@ export default class Login extends Vue {
     input {
       border: 1px solid $purple;
       border-radius: 3px;
-      padding: 5px 5px 2px;
+      padding: 5px 5px 3px;
     }
 
     .error {
@@ -341,6 +341,10 @@ export default class Login extends Vue {
       background-color: darken($purple, 5%);
     }
 
+    &:active {
+      background-color: darken($purple, 15%);
+    }
+
     &.secondary {
       background-color: $white;
       border-color: $green;
@@ -350,6 +354,10 @@ export default class Login extends Vue {
         background-color: darken($white, 2%);
       }
 
+      &:active {
+        background-color: darken($white, 5%);
+      }
+
       &.active {
         background-color: $green;
         border: 1px solid darken($green, 10%);
@@ -357,6 +365,10 @@ export default class Login extends Vue {
 
         &:hover {
           background-color: darken($green, 5%);
+        }
+
+        &:active {
+          background-color: darken($green, 15%);
         }
       }
     }

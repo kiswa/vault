@@ -1,11 +1,20 @@
 <template>
   <div class="container">
-    <div class="add">
-      <h2>Add to your vault</h2>
-    </div>
+    <nav>
+      <div class="logo">
+        <img src="logo.svg">
+        vault
+      </div>
 
-    <div class="display">
-    </div>
+      <div>
+        <button @click="signOut()">
+          Sign Out
+        </button>
+      </div>
+    </nav>
+
+    <main>
+    </main>
   </div>
 </template>
 
@@ -45,6 +54,7 @@ export default class Home extends Vue {
   public data: VaultData[] = [];
 
   private http = (this as any).$http;
+  private eb = (this as any).$eventBus;
 
   public created() {
     const jwt = localStorage.getItem('vjwt');
@@ -65,6 +75,12 @@ export default class Home extends Vue {
 
   }
 
+  public signOut() {
+    localStorage.removeItem('vjwt');
+    localStorage.removeItem('name');
+
+    this.$router.push('/');
+  }
 }
 </script>
 
@@ -74,6 +90,48 @@ export default class Home extends Vue {
 .container {
   margin: 0 auto;
   max-width: 1200px;
+
+  nav {
+    align-items: center;
+    display: flex;
+    height: 4rem;
+    justify-content: space-between;
+
+    .logo {
+      align-items: center;
+      display: flex;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    button {
+      background-color: $white;
+      border: 1px solid darken($purple, 15%);
+      border-radius: 3px;
+      color: darken($purple, 15%);
+      cursor: pointer;
+      outline: none;
+      padding: .5rem;
+      transition: all .3s ease;
+
+      &:hover {
+        background-color: lighten($purple, 30%);
+      }
+
+      &:active {
+        background-color: lighten($purple, 20%);
+      }
+    }
+  }
+
+  main {
+    background: $white;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14),
+                0 1px 5px 0 rgba(0, 0, 0, .12),
+                0 3px 1px -2px rgba(0, 0, 0, .2);
+    margin: 2rem 0;
+    min-height: 10rem;
+  }
 
   .add,
   .display {

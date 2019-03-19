@@ -90,7 +90,7 @@ async function createNewUser(username, password) {
       return newUser
     }
 
-    newUser.alerts = ['New user created successfully.']
+    newUser.alerts = ['Welcome to vault!']
     return newUser
   }).catch(err => console.log(err))
 }
