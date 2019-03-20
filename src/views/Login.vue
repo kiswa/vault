@@ -7,7 +7,8 @@
 
     <label>
       User Name:
-      <input type="text" id="uname" v-model="username" />
+      <input type="text" id="uname" v-model="username"
+             @keyup.enter="signInUp" />
 
       <span class="error" v-if="usernameError">
         {{ usernameError }}
@@ -16,8 +17,8 @@
 
     <label>
       Password:
-      <password-toggle @keyup="resetErrors" v-model="password">
-      </password-toggle>
+      <password-toggle @keyup="resetErrors" v-model="password"
+                       @keyup.enter="signInUp"></password-toggle>
 
       <span class="error" v-if="passwordError">
        {{ passwordError }}
@@ -27,8 +28,8 @@
     <transition name="fade">
       <label v-if="isSignUp">
         Verify Password:
-        <password-toggle @keyup="resetErrors" v-model="verifyPassword">
-        </password-toggle>
+        <password-toggle @keyup="resetErrors" v-model="verifyPassword"
+                         @keyup.enter="signInUp"></password-toggle>
 
         <span class="error" v-if="verifyError">
           Verification password does not match original password.
@@ -46,7 +47,7 @@
     </button>
 
     <button @click="resetErrors(); isSignUp = false" v-if="isSignUp"
-            class="secondary">
+            class="secondary" :disabled="isLoading">
       Cancel
     </button>
   </div>
@@ -87,12 +88,24 @@ export default class Login extends Vue {
     }
   }
 
-  public async signIn() {
-    if (!this.validateSignIn()) {
+  public signInUp() {
+    if (this.isSignUp) {
+      this.signUp();
+
       return;
     }
 
+    this.signIn();
+  }
+
+  public async signIn() {
     this.isLoading = true;
+
+    if (!this.validateSignIn()) {
+      this.isLoading = false;
+      return;
+    }
+
     const { data } = await this.http.post('signin', {
       username: this.username,
       password: this.password,
@@ -104,13 +117,16 @@ export default class Login extends Vue {
       this.passwordError = data.alerts[0];
       this.isLoading = false;
 
+      this.isLoading = false;
       return;
     }
 
+    this.isLoading = false;
     this.redirectHome(data.data.token, data.data.name);
   }
 
   public async signUp() {
+    this.isLoading = true;
     this.resetErrors();
 
     if (!this.isSignUp) {
@@ -118,10 +134,12 @@ export default class Login extends Vue {
       this.passwordVerifyType = 'password';
       this.verifyPassword = '';
 
+      this.isLoading = false;
       return;
     }
 
     if (!this.validateSignUp()) {
+      this.isLoading = false;
       return;
     }
 
@@ -142,6 +160,7 @@ export default class Login extends Vue {
       return;
     }
 
+    this.isLoading = false;
     this.redirectHome(data.data.token, data.data.name);
   }
 
@@ -300,6 +319,19 @@ export default class Login extends Vue {
     outline: none;
     padding: .5rem 0;
     transition: all .3s ease;
+
+    &[disabled],
+    &.secondary[disabled],
+    &.secondary.active[disabled]{
+      background-color: lighten($grey, 15%);
+      border: 1px solid $grey;
+      color: $white;
+      cursor: default;
+
+      &:hover {
+        background-color: lighten($grey, 15%);
+      }
+    }
 
     &:hover {
       background-color: darken($purple, 5%);

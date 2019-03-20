@@ -12,8 +12,8 @@
     </nav>
 
     <main>
-      <add-edit :value="addEdit" :isEdit="isEdit" @submit="addEdit($event)">
-      </add-edit>
+      <add-edit :value="addEdit" :isEdit="isEdit"
+                @submit="addEditItem"></add-edit>
 
       <div class="list">
         <!-- TODO: Make component. -->
@@ -33,14 +33,10 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { Route } from 'vue-router';
 
-import AddEdit from '@/components/AddEdit.vue';
+import * as sjcl from 'sjcl';
 
-class VaultData {
-  public product = '';
-  public category = '';
-  public name = '';
-  public password = '';
-}
+import AddEdit from '@/components/AddEdit.vue';
+import { VaultData } from '@/models/vault-data';
 
 @Component({
   components: {
@@ -90,10 +86,22 @@ export default class Home extends Vue {
     this.getUserData();
   }
 
+  public async addEditItem() {
+    const jwt = (localStorage.getItem('vjwt') as string);
+    const cipher = sjcl.encrypt(jwt, JSON.stringify(this.addEdit.password));
+
+    const data = {...this.addEdit};
+    data.password = JSON.stringify(cipher);
+
+    if (this.isEdit) {
+      const editResult = await this.http.update('user/item', data);
+    }
+
+    const addResult = await this.http.post('user/item', data);
+  }
+
   public async getUserData() {
     const { data } = await this.http.get('user/data');
-
-    console.log(data); // tslint:disable-line
   }
 
   public signOut() {

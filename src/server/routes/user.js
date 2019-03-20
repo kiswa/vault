@@ -16,5 +16,21 @@ router.get('/data', (req, res) => {
   return res.json(data)
 })
 
+router.post('/item', (req, res) => {
+  const data = req.body;
+
+  console.log(JSON.parse(data.password));
+
+  return res;
+})
+
+router.put('/item', (req, res) => {
+  const data = req.body;
+
+  console.log(data);
+
+  return res;
+})
+
 module.exports = router
 

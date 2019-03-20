@@ -1,6 +1,6 @@
 <template>
 <div>
-  <input :type="passwordType" :value="value" @keyup="$emit('keyup')"
+  <input :type="passwordType" :value="value" @keyup="$emit('keyup', $event)"
          @input="$emit('input', $event.target.value)" />
 
   <a class="password-toggle" role="button" @click="togglePassword">

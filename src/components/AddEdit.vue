@@ -30,7 +30,7 @@
       </password-toggle>
     </label>
 
-    <button @click="emitValues()">{{ isEdit ? 'Save' : 'Add' }}</button>
+    <button @click="$emit('submit')">{{ isEdit ? 'Save' : 'Add' }}</button>
   </div>
 </div>
 </template>
