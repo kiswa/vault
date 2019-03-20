@@ -41,7 +41,13 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
-@Component({})
+import PasswordToggle from '@/components/PasswordToggle.vue';
+
+@Component({
+  components: {
+    PasswordToggle,
+  },
+})
 export default class AddEdit extends Vue {
   public addPasswordType = 'password';
 
@@ -63,7 +69,7 @@ export default class AddEdit extends Vue {
     padding: 1rem;
 
     label {
-      align-items: baseline;
+      align-items: center;
       display: flex;
       height: 28px;
       justify-content: space-between;
