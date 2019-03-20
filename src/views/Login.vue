@@ -16,18 +16,8 @@
 
     <label>
       Password:
-
-      <span class="group">
-        <input :type="passwordType" @keyup="resetErrors" v-model="password" />
-
-        <a class="password-toggle" role="button" @click="togglePassword">
-          <img src="eye.svg" alt="toggle password"
-               class="password-toggle-icon" v-if="passwordType === 'password'">
-
-          <img src="eye-line.svg" alt="toggle password"
-               class="password-toggle-icon" v-if="passwordType === 'text'">
-        </a>
-      </span>
+      <password-toggle @keyup="resetErrors" v-model="password">
+      </password-toggle>
 
       <span class="error" v-if="passwordError">
        {{ passwordError }}
@@ -37,22 +27,8 @@
     <transition name="fade">
       <label v-if="isSignUp">
         Verify Password:
-
-        <span class="group">
-          <input :type="passwordVerifyType" @keyup="resetErrors"
-                 v-model="verifyPassword" />
-
-          <a class="password-toggle" role="button"
-             @click="togglePasswordVerify">
-            <img src="eye.svg" alt="toggle password"
-                 class="password-toggle-icon"
-                 v-if="passwordVerifyType === 'password'">
-
-            <img src="eye-line.svg" alt="toggle password"
-                 class="password-toggle-icon"
-                 v-if="passwordVerifyType === 'text'">
-          </a>
-        </span>
+        <password-toggle @keyup="resetErrors" v-model="verifyPassword">
+        </password-toggle>
 
         <span class="error" v-if="verifyError">
           Verification password does not match original password.
@@ -79,7 +55,13 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 
-@Component({})
+import PasswordToggle from '@/components/PasswordToggle.vue';
+
+@Component({
+  components: {
+    PasswordToggle,
+  },
+})
 export default class Login extends Vue {
   public username = '';
   public password = '';
@@ -293,31 +275,6 @@ export default class Login extends Vue {
     margin-bottom: 1rem;
     overflow: hidden;
     text-align: left;
-
-    .group {
-      position: relative;
-
-      a {
-        border: none;
-        margin: auto;
-        padding: 0;
-      }
-
-      input {
-        padding-right: 26px;
-        width: 100%;
-      }
-
-      .password-toggle-icon {
-        cursor: pointer;
-        height: 18px;
-        fill: $purple;
-        position: absolute;
-        right: 4px;
-        top: 4px;
-        width: 18px;
-      }
-    }
 
     input {
       border: 1px solid $purple;

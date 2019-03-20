@@ -12,7 +12,8 @@
     </nav>
 
     <main>
-      <add-edit></add-edit>
+      <add-edit :value="addEdit" :isEdit="isEdit" @submit="addEdit($event)">
+      </add-edit>
 
       <div class="list">
         <!-- TODO: Make component. -->
@@ -20,6 +21,7 @@
 
         <div v-if="data.length === 0">
           No entries found.
+          <pre style="text-align: left;">{{ addEdit }}</pre>
         </div>
       </div>
     </main>
@@ -33,11 +35,11 @@ import { Route } from 'vue-router';
 
 import AddEdit from '@/components/AddEdit.vue';
 
-interface VaultData {
-  product: string;
-  category: string;
-  name: string;
-  password: string;
+class VaultData {
+  public product = '';
+  public category = '';
+  public name = '';
+  public password = '';
 }
 
 @Component({
@@ -67,10 +69,12 @@ interface VaultData {
   },
 })
 export default class Home extends Vue {
-  public data: VaultData[] = [];
-
   private http = (this as any).$http;
   private eb = (this as any).$eventBus;
+
+  private data: VaultData[] = [];
+  private addEdit = new VaultData();
+  private isEdit = false;
 
   public created() {
     const jwt = localStorage.getItem('vjwt');
@@ -184,7 +188,6 @@ export default class Home extends Vue {
 
     input {
       cursor: default;
-      max-width: 60%;
       padding: 5px 5px 3px;
     }
 

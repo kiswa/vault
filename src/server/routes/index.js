@@ -29,7 +29,7 @@ router.post('/signin', async (req, res) => {
 
   if (match) {
     user.data = getUserDataWithToken(user.data.id)
-    user.alerts.push('Welcome back!')
+    user.alerts.push(`Welcome back ${user.data.name}!`)
 
     return res.json(user)
   }

@@ -1,39 +1,36 @@
 <template>
 <div class="add">
-  <h2>Add to your vault</h2>
+  <h2 v-if="!isEdit">Add to your vault</h2>
+
+  <h2 v-if="isEdit">Edit credentials</h2>
 
   <div class="form">
     <label>
       Product Name:
-      <input type="text" />
+      <input type="text" class="partial" v-model="value.product"
+             @input="$emit('update:product', $event.target.value)" />
     </label>
 
     <label>
       Category:
-      <input type="text" />
+      <input type="text" class="partial" v-model="value.category"
+             @input="$emit('update:category', $event.target.value)" />
     </label>
 
     <label>
       Username:
-      <input type="text" />
+      <input type="text" class="partial" v-model="value.name"
+             @input="$emit('update:name', $event.target.value)" />
     </label>
 
     <label class="group">
       Password:
-      <input :type="addPasswordType" />
-
-      <a class="password-toggle" role="button" @click="toggleAddPassword">
-        <img src="eye.svg" alt="toggle password"
-             class="password-toggle-icon"
-             v-if="addPasswordType === 'password'">
-
-        <img src="eye-line.svg" alt="toggle password"
-             class="password-toggle-icon"
-             v-if="addPasswordType === 'text'">
-      </a>
+      <password-toggle class="partial" v-model="value.password"
+                       @input="$emit('update:password', $event.target.value)">
+      </password-toggle>
     </label>
 
-    <button>Add</button>
+    <button @click="emitValues()">{{ isEdit ? 'Save' : 'Add' }}</button>
   </div>
 </div>
 </template>
@@ -47,15 +44,13 @@ import PasswordToggle from '@/components/PasswordToggle.vue';
   components: {
     PasswordToggle,
   },
+
+  props: [
+    'value',
+    'isEdit',
+  ],
 })
 export default class AddEdit extends Vue {
-  public addPasswordType = 'password';
-
-  public toggleAddPassword() {
-    this.addPasswordType = this.addPasswordType === 'text'
-      ? 'password'
-      : 'text';
-  }
 }
 </script>
 
@@ -75,30 +70,8 @@ export default class AddEdit extends Vue {
       justify-content: space-between;
       margin-bottom: 1rem;
 
-      &.group {
-        position: relative;
-
-        input {
-          padding-right: 26px;
-          position: absolute;
-          right: 0;
-        }
-      }
-
-      a {
-        border: none;
-        margin: auto;
-        padding: 0;
-      }
-
-      .password-toggle-icon {
-        cursor: pointer;
-        height: 18px;
-        fill: $purple;
-        position: absolute;
-        right: 4px;
-        top: 4px;
-        width: 18px;
+      .partial {
+        width: 60%;
       }
     }
   }
