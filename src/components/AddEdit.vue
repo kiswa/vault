@@ -50,8 +50,7 @@ import PasswordToggle from '@/components/PasswordToggle.vue';
     'isEdit',
   ],
 })
-export default class AddEdit extends Vue {
-}
+export default class AddEdit extends Vue { }
 </script>
 
 <style lang="scss" scoped>
