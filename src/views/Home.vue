@@ -45,18 +45,15 @@
                   </div>
 
                   <div class="icons">
-                    <img svg-inline src="../../public/copy.svg"
-                         title="Copy Password">
-
                     <img svg-inline src="../../public/eye.svg"
-                         alt="Show Password" title="Show Password"
                          v-if="!item.showPassword"
                          @click="item.showPassword = !item.showPassword">
 
                     <img svg-inline src="../../public/eye-line.svg"
-                         alt="Hide Password" title="Hide Password"
                          v-if="item.showPassword"
                          @click="item.showPassword = !item.showPassword">
+
+                    <img svg-inline src="../../public/copy.svg">
                   </div>
                 </div>
             </div>
@@ -321,20 +318,16 @@ export default class Home extends Vue {
             width: 50px;
 
             svg {
-              color: $warning;
+              color: $purple;
               cursor: pointer;
               height: 20px;
-
-              &:nth-of-type(2) {
-                color: $purple;
-              }
             }
-
           }
         }
-      }
 
+      }
     }
+
   }
 }
 </style>
