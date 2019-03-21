@@ -21,9 +21,9 @@
     "forever": "^0.15.3",
     "jsonwebtoken": "^8.5.1",
     "sjcl": "^1.0.8",
-    "vue": "^2.6.9",
+    "vue": "^2.6.10",
     "vue-class-component": "^7.0.1",
-    "vue-property-decorator": "^8.0.0",
+    "vue-property-decorator": "^8.1.0",
     "vue-router": "^3.0.2"
   },
   "devDependencies": {
@@ -36,7 +36,8 @@
     "nodemon": "^1.18.10",
     "normalize.css": "^8.0.1",
     "sass-loader": "^7.1.0",
-    "typescript": "^3.3.3333",
-    "vue-template-compiler": "^2.6.9"
+    "typescript": "^3.3.4000",
+    "vue-svg-inline-loader": "^1.2.15",
+    "vue-template-compiler": "^2.6.10"
   }
 }

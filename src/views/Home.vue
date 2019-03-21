@@ -19,13 +19,49 @@
         <!-- TODO: Make component. -->
         <h2>Stored Credentials</h2>
 
-        <div v-if="data.length === 0">
-          No entries found.
-          <pre style="text-align: left;">{{ addEdit }}</pre>
-        </div>
+        <div class="display">
+          <div v-if="data.length === 0">
+            No entries found.
+          </div>
 
-        <div v-for="item in data" :key="item.id">
-          {{ item }}
+          <header>
+            <div>Product</div>
+            <div>Category</div>
+            <div>Username</div>
+            <div>Password</div>
+          </header>
+
+          <div class="body">
+            <div class="row" v-for="item in data" :key="item.id">
+                <div>{{ item.product }}</div>
+
+                <div>{{ item.cat_name }}</div>
+
+                <div>{{ item.name }}</div>
+
+                <div class="pword">
+                  <div :class="item.showPassword ? '' : 'hidden'">
+                    {{ item.showPassword ? item.password : item.passwordMask }}
+                  </div>
+
+                  <div class="icons">
+                    <img svg-inline src="../../public/copy.svg"
+                         title="Copy Password">
+
+                    <img svg-inline src="../../public/eye.svg"
+                         alt="Show Password" title="Show Password"
+                         v-if="!item.showPassword"
+                         @click="item.showPassword = !item.showPassword">
+
+                    <img svg-inline src="../../public/eye-line.svg"
+                         alt="Hide Password" title="Hide Password"
+                         v-if="item.showPassword"
+                         @click="item.showPassword = !item.showPassword">
+                  </div>
+                </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </main>
@@ -41,6 +77,7 @@ import * as sjcl from 'sjcl';
 
 import AddEdit from '@/components/AddEdit.vue';
 import { VaultData } from '@/models/vault-data';
+import { ApiResponse } from '@/models/api-response';
 
 @Component({
   components: {
@@ -97,19 +134,11 @@ export default class Home extends Vue {
     const data = { ...this.addEdit };
     data.password = JSON.stringify(cipher);
 
-    if (this.isEdit) {
-      const editResult = await this.http.update('user/item', data);
-    }
+    const result = this.isEdit
+      ? await this.http.update('user/item', data).data
+      : await this.http.post('user/item', data).data;
 
-    const addResult = await this.http.post('user/item', data).data;
-    if (!Array.isArray(addResult)) {
-      this.data = [];
-      this.data.push(addResult);
-
-      return;
-    }
-
-    this.data = addResult;
+    this.parseData(result);
   }
 
   public signOut() {
@@ -125,6 +154,22 @@ export default class Home extends Vue {
 
   private async getUserData() {
     const { data } = await this.http.get('user/data');
+
+    this.parseData(data);
+  }
+
+  private parseData(data: ApiResponse) {
+    const jwt = (localStorage.getItem('vjwt') as string);
+
+    data.data.forEach((item: any) => {
+      item.password = JSON.parse(sjcl.decrypt(jwt, item.password));
+
+      item.passwordMask = '';
+      item.showPassword = false;
+      for (let i = 0; i < item.password.length; i++) { // tslint:disable-line
+        item.passwordMask += '*';
+      }
+    });
 
     this.data = data.data;
   }
@@ -233,9 +278,62 @@ export default class Home extends Vue {
       flex: 1;
       margin-left: 1rem;
 
-      div {
+      .display {
         padding: 1rem;
+
+        header,
+        .row {
+          display: flex;
+          justify-content: space-around;
+
+          div {
+            line-height: 2;
+            width: 24%;
+          }
+        }
+
+        header {
+          font-weight: bold;
+        }
+
+        .row:nth-of-type(even) {
+          background-color: lighten($black, 77%);
+        }
+
+        .pword {
+          display: flex;
+          justify-content: space-between;
+
+          div:nth-of-type(1) {
+            flex-grow: 1;
+            text-align: left;
+          }
+
+          .hidden {
+            margin-bottom: -5px;
+            padding-top: 5px;
+          }
+
+          .icons {
+            align-items: center;
+            display: flex;
+            justify-content: space-around;
+            width: 50px;
+
+            svg {
+              color: $warning;
+              cursor: pointer;
+              height: 20px;
+
+              &:nth-of-type(2) {
+                color: $purple;
+              }
+            }
+
+          }
+        }
       }
+
     }
   }
 }

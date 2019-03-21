@@ -4,11 +4,11 @@
          @input="$emit('input', $event.target.value)" />
 
   <a class="password-toggle" role="button" @click="togglePassword">
-    <img src="eye.svg" alt="toggle password"
+    <img svg-inline src="../../public/eye.svg" alt="Show Password" title="Show Password"
          class="password-toggle-icon"
          v-if="passwordType === 'password'">
 
-    <img src="eye-line.svg" alt="toggle password"
+    <img svg-inline src="../../public/eye-line.svg" alt="Hide Password" title="Hide Password"
          class="password-toggle-icon"
          v-if="passwordType === 'text'">
   </a>
@@ -52,6 +52,7 @@ div {
   }
 
   .password-toggle-icon {
+    color: $purple;
     cursor: pointer;
     height: 18px;
     fill: $purple;
