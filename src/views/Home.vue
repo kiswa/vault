@@ -23,6 +23,10 @@
           No entries found.
           <pre style="text-align: left;">{{ addEdit }}</pre>
         </div>
+
+        <div v-for="item in data" :key="item.id">
+          {{ item }}
+        </div>
       </div>
     </main>
 
@@ -90,18 +94,22 @@ export default class Home extends Vue {
     const jwt = (localStorage.getItem('vjwt') as string);
     const cipher = sjcl.encrypt(jwt, JSON.stringify(this.addEdit.password));
 
-    const data = {...this.addEdit};
+    const data = { ...this.addEdit };
     data.password = JSON.stringify(cipher);
 
     if (this.isEdit) {
       const editResult = await this.http.update('user/item', data);
     }
 
-    const addResult = await this.http.post('user/item', data);
-  }
+    const addResult = await this.http.post('user/item', data).data;
+    if (!Array.isArray(addResult)) {
+      this.data = [];
+      this.data.push(addResult);
 
-  public async getUserData() {
-    const { data } = await this.http.get('user/data');
+      return;
+    }
+
+    this.data = addResult;
   }
 
   public signOut() {
@@ -113,6 +121,12 @@ export default class Home extends Vue {
       message: 'You have been signed out.',
     });
     this.$router.push('/');
+  }
+
+  private async getUserData() {
+    const { data } = await this.http.get('user/data');
+
+    this.data = data.data;
   }
 }
 </script>

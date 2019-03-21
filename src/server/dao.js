@@ -43,6 +43,26 @@ class DataAccessObject {
     return response
   }
 
+  all(sql, params) {
+    const response = new ApiResponse()
+
+    try {
+      const data = this.db.prepare(sql).all(params)
+
+      response.success(data)
+
+      if (!data) {
+        response.data = []
+        response.alerts.push('No results.')
+      }
+    } catch (err) {
+      console.log(err)
+      response.data = err
+    }
+
+    return response
+  }
+
   run(sql, params) {
     const response = new ApiResponse()
 
