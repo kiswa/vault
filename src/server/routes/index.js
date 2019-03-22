@@ -1,13 +1,6 @@
-const DataAccessObject = require('../dao').DataAccessObject
-const ApiResponse = require('../dao').ApiResponse
-
 const {
-  router, path, jwt, bcrypt, saltRounds, SECRET
+  router, path, dao, ApiResponse, jwt, bcrypt, saltRounds, SECRET
 } = require('../config.js')
-
-const dao = new DataAccessObject(path.resolve(__dirname, '../../../vault.db'), {
-  migrations: ['./migrations/v1.0.js']
-})
 
 router.post('/auth', (_, res) => {
   return res.json(new ApiResponse('success'))

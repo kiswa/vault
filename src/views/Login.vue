@@ -74,9 +74,6 @@ export default class Login extends Vue {
   public isSignUp = false;
   public isLoading = false;
 
-  public passwordType = 'password';
-  public passwordVerifyType = 'password';
-
   private http = (this as any).$http;
   private eb = (this as any).$eventBus;
 
@@ -99,12 +96,12 @@ export default class Login extends Vue {
   }
 
   public async signIn() {
-    this.isLoading = true;
-
     if (!this.validateSignIn()) {
-      this.isLoading = false;
       return;
     }
+
+    this.isLoading = true;
+    this.eb.$emit('reset-password-toggle');
 
     const { data } = await this.http.post('signin', {
       username: this.username,
@@ -117,7 +114,6 @@ export default class Login extends Vue {
       this.passwordError = data.alerts[0];
       this.isLoading = false;
 
-      this.isLoading = false;
       return;
     }
 
@@ -126,24 +122,21 @@ export default class Login extends Vue {
   }
 
   public async signUp() {
-    this.isLoading = true;
     this.resetErrors();
 
     if (!this.isSignUp) {
       this.isSignUp = true;
-      this.passwordVerifyType = 'password';
-      this.verifyPassword = '';
 
-      this.isLoading = false;
       return;
     }
 
     if (!this.validateSignUp()) {
-      this.isLoading = false;
       return;
     }
 
     this.isLoading = true;
+    this.eb.$emit('reset-password-toggle');
+
     const { data } = await this.http.post('signup', {
       username: this.username,
       password: this.password,
@@ -152,7 +145,7 @@ export default class Login extends Vue {
 
     this.notifyAlerts(data.status, data.alerts);
 
-    if (data.status === 'error') {
+    if (data.status !== 'success') {
       this.usernameError = data.alerts[0];
       this.isSignUp = false;
       this.isLoading = false;
@@ -162,18 +155,6 @@ export default class Login extends Vue {
 
     this.isLoading = false;
     this.redirectHome(data.data.token, data.data.name);
-  }
-
-  public togglePassword() {
-    this.passwordType = this.passwordType === 'text'
-      ? 'password'
-      : 'text';
-  }
-
-  public togglePasswordVerify() {
-    this.passwordVerifyType = this.passwordVerifyType === 'text'
-      ? 'password'
-      : 'text';
   }
 
   public resetErrors() {

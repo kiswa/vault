@@ -30,7 +30,16 @@
       </password-toggle>
     </label>
 
-    <button @click="$emit('submit')">{{ isEdit ? 'Save' : 'Add' }}</button>
+    <div>
+      <button @click="$emit('submit')">
+        {{ isEdit ? 'Save' : 'Add' }}
+      </button>
+
+      <button @click="cancelEdit" v-if="isEdit" class="cancel">
+        Cancel
+      </button>
+    </div>
+
   </div>
 </div>
 </template>
@@ -50,7 +59,13 @@ import PasswordToggle from '@/components/PasswordToggle.vue';
     'isEdit',
   ],
 })
-export default class AddEdit extends Vue { }
+export default class AddEdit extends Vue {
+  private eb = (this as any).$eventBus;
+
+  private cancelEdit() {
+    this.eb.$emit('cancel-edit');
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -71,6 +86,19 @@ export default class AddEdit extends Vue { }
 
       .partial {
         width: 60%;
+      }
+    }
+
+    button {
+      margin-right: 1rem;
+
+      &.cancel {
+        background-color: $white;
+        color: $purple;
+
+        &:hover {
+          background-color: darken($white, 3%);
+        }
       }
     }
   }

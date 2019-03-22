@@ -25,9 +25,33 @@
           </div>
 
           <header>
-            <div>Product</div>
-            <div>Category</div>
-            <div>Username</div>
+            <div>
+              Product
+              <span :class="{ active: currentSort === 'product',
+                              up: sortDir === 'DESC' }"
+                    @click="sortBy('product')">
+                <img svg-inline src="../../public/angle-down.svg" />
+              </span>
+            </div>
+
+            <div>
+              Category
+              <span :class="{ active: currentSort === 'category',
+                              up: sortDir === 'DESC' }"
+                    @click="sortBy('category')">
+                <img svg-inline src="../../public/angle-down.svg" />
+              </span>
+            </div>
+
+            <div>
+              Username
+              <span :class="{ active: currentSort === 'name',
+                              up: sortDir === 'DESC' }"
+                    @click="sortBy('name')">
+                <img svg-inline src="../../public/angle-down.svg" />
+              </span>
+            </div>
+
             <div>Password</div>
           </header>
 
@@ -35,7 +59,7 @@
             <div class="row" v-for="item in data" :key="item.id">
                 <div>{{ item.product }}</div>
 
-                <div>{{ item.cat_name }}</div>
+                <div>{{ item.category }}</div>
 
                 <div>{{ item.name }}</div>
 
@@ -54,6 +78,9 @@
                          @click="item.showPassword = !item.showPassword">
 
                     <img svg-inline src="../../public/copy.svg">
+
+                    <img svg-inline src="../../public/edit.svg"
+                         @click="edit(item)">
                   </div>
                 </div>
             </div>
@@ -109,6 +136,8 @@ export default class Home extends Vue {
   private data: VaultData[] = [];
   private addEdit = new VaultData();
   private isEdit = false;
+  private currentSort = 'product';
+  private sortDir = 'ASC';
 
   public created() {
     const jwt = localStorage.getItem('vjwt');
@@ -118,10 +147,20 @@ export default class Home extends Vue {
     if (name) {
       document.title = `vault - ${name}`;
     }
+
+    this.eb.$on('cancel-edit', () => {
+      this.addEdit = new VaultData();
+      this.isEdit = false;
+    });
   }
 
   public mounted() {
     this.getUserData();
+  }
+
+  public edit(item: VaultData) {
+    this.isEdit = true;
+    this.addEdit = item;
   }
 
   public async addEditItem() {
@@ -149,6 +188,35 @@ export default class Home extends Vue {
     this.$router.push('/');
   }
 
+  private sortBy(column: string) {
+    if (this.currentSort === column) {
+      this.sortDir = this.sortDir === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      this.sortDir = 'ASC';
+    }
+
+    this.currentSort = column;
+
+    this.data.sort((a, b) => {
+      const aa = (a[column] as string).toLowerCase();
+      const bb = (b[column] as string).toLowerCase();
+
+      if (this.sortDir === 'DESC') {
+        return bb > aa
+          ? 1
+          : bb < aa
+            ? -1
+            : 0;
+      }
+
+      return aa > bb
+        ? 1
+        : aa < bb
+          ? -1
+          : 0;
+    });
+  }
+
   private async getUserData() {
     const { data } = await this.http.get('user/data');
 
@@ -168,7 +236,9 @@ export default class Home extends Vue {
       }
     });
 
-    this.data = data.data;
+    this.data = data.data.slice();
+    this.sortDir = 'DESC'; // For the first call, use an opposite value
+    this.sortBy('product');
   }
 }
 </script>
@@ -284,8 +354,32 @@ export default class Home extends Vue {
           justify-content: space-around;
 
           div {
+            display: flex;
+            justify-content: space-between;
             line-height: 2;
             width: 24%;
+
+            span {
+              color: lighten($grey, 25%);
+              width: 32px;
+
+              &.active {
+                color: $black;
+
+                &.up {
+                  svg {
+                    transform: rotate(180deg);
+                  }
+                }
+              }
+            }
+
+            svg {
+              cursor: pointer;
+              margin-top: 12px;
+              transition: all .3s;
+              width: 12px;
+            }
           }
         }
 
@@ -315,12 +409,13 @@ export default class Home extends Vue {
             align-items: center;
             display: flex;
             justify-content: space-around;
-            width: 50px;
+            width: 75px;
 
             svg {
               color: $purple;
               cursor: pointer;
-              height: 20px;
+              margin: 0;
+              width: 20px;
             }
           }
         }

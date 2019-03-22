@@ -3,5 +3,7 @@ export class VaultData {
   public category = '';
   public name = '';
   public password = '';
+
+  [key: string]: string;
 }
 

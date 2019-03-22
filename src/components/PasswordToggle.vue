@@ -26,6 +26,14 @@ import { Component, Vue } from 'vue-property-decorator';
 export default class PasswordToggle extends Vue {
   public passwordType = 'password';
 
+  private eb = (this as any).$eventBus;
+
+  public mounted() {
+    this.eb.$on('reset-password-toggle', () => {
+      this.passwordType = 'password';
+    });
+  }
+
   public togglePassword() {
     this.passwordType = this.passwordType === 'text'
       ? 'password'

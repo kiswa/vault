@@ -1,18 +1,12 @@
 const sjcl = require('sjcl')
 
-const DataAccessObject = require('../dao').DataAccessObject
-const ApiResponse = require('../dao').ApiResponse
+const { router, path, dao, ApiResponse, SECRET } = require('../config.js')
 
-const { router, path, SECRET } = require('../config.js')
-
-const vaultQuery = `SELECT vault.*, category.name AS cat_name FROM vault
+const vaultQuery = `SELECT vault.id, vault.product, vault.name,
+                    vault.password, category.name AS category FROM vault
                     JOIN category ON category.id = vault.category_id
                     JOIN user ON user.id = vault.user_id
                     WHERE user.id = ?`
-
-const dao = new DataAccessObject(path.resolve(__dirname, '../../../vault.db'), {
-  migrations: ['./migrations/v1.0.js']
-})
 
 router.get('/data', (req, res) => {
   const response = dao.all(vaultQuery, req.auth.id)
