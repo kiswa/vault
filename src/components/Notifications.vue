@@ -2,7 +2,7 @@
   <div id="notifications-container" v-if="notifications.length">
     <transition-group name="collapse">
       <div v-for="note in notifications" :key="note.message"
-          class="note" :class="note.type" @click="removeNotification(note)">
+           class="note" :class="note.type" @click="removeNotification(note)">
         <header v-if="note.title && note.title.length > 0">
           {{ note.title }}
         </header>
@@ -29,7 +29,7 @@ export default class Notifications extends Vue {
 
       setTimeout(() => {
         this.removeNotification(data);
-      }, 3000);
+      }, 2000);
     });
   }
 

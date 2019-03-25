@@ -54,9 +54,10 @@ router.put('/item', (req, res) => {
     )
   )
 
-  const result = dao.run(`UPDATE vault SET product = ?, name = ?, password = ?
-                          WHERE id = ?` [body.product, body.name,
-                          pword, body.id])
+  const result = dao.run(`UPDATE vault
+                          SET product = ?, name = ?, password = ?
+                          WHERE id = ?`,
+                          [body.product, body.name, pword, body.id])
 
   if (result.status === 'success') {
     const response = dao.all(vaultQuery, req.auth.id)
