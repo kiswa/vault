@@ -43,10 +43,31 @@ router.post('/item', (req, res) => {
 })
 
 router.put('/item', (req, res) => {
-  const data = req.body;
+  const jwt = req.headers.authorization.split(' ')[1]
+  const { body } = req
 
+  console.log(body)
 
-  return res;
+  const pword = JSON.stringify(
+    sjcl.encrypt(
+      SECRET, sjcl.decrypt(jwt, JSON.parse(body.password))
+    )
+  )
+
+  const result = dao.run(`UPDATE vault SET product = ?, name = ?, password = ?
+                          WHERE id = ?` [body.product, body.name,
+                          pword, body.id])
+
+  if (result.status === 'success') {
+    const response = dao.all(vaultQuery, req.auth.id)
+    reEncode(response.data, jwt)
+
+    response.alerts = ['Credentials updated.']
+
+    return res.json(response)
+  }
+
+  return res.json(result)
 })
 
 function reEncode(items, key) {

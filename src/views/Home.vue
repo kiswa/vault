@@ -30,7 +30,9 @@
               <span :class="{ active: currentSort === 'product',
                               up: sortDir === 'DESC' }"
                     @click="sortBy('product')">
-                <img svg-inline src="../../public/angle-down.svg" />
+                <i v-if="data.length > 1">
+                  <img svg-inline src="../../public/angle-down.svg" />
+                </i>
               </span>
             </div>
 
@@ -39,7 +41,9 @@
               <span :class="{ active: currentSort === 'category',
                               up: sortDir === 'DESC' }"
                     @click="sortBy('category')">
-                <img svg-inline src="../../public/angle-down.svg" />
+                <i v-if="data.length > 1">
+                  <img svg-inline src="../../public/angle-down.svg" />
+                </i>
               </span>
             </div>
 
@@ -48,7 +52,9 @@
               <span :class="{ active: currentSort === 'name',
                               up: sortDir === 'DESC' }"
                     @click="sortBy('name')">
-                <img svg-inline src="../../public/angle-down.svg" />
+                <i v-if="data.length > 1">
+                  <img svg-inline src="../../public/angle-down.svg" />
+                </i>
               </span>
             </div>
 
@@ -77,7 +83,14 @@
                          v-if="item.showPassword"
                          @click="item.showPassword = !item.showPassword">
 
-                    <img svg-inline src="../../public/copy.svg">
+                    <span class="copy-wrapper">
+                      <img svg-inline src="../../public/copy.svg"
+                           @click="copy(item)">
+
+                      <span v-if="item.copyStatus.length">
+                        {{ item.copyStatus }}
+                      </span>
+                    </span>
 
                     <img svg-inline src="../../public/edit.svg"
                          @click="edit(item)">
@@ -163,6 +176,21 @@ export default class Home extends Vue {
     this.addEdit = item;
   }
 
+  public copy(item: any) {
+    const nav = (navigator as any);
+
+    nav.clipboard.writeText(item.password).then(() => {
+      item.copyStatus = 'Copied to clipboard!';
+    },
+    () => {
+      item.copyStatus = 'Something went wrong.';
+    });
+
+    setTimeout(() => {
+      item.copyStatus = '';
+    }, 1500);
+  }
+
   public async addEditItem() {
     const jwt = (localStorage.getItem('vjwt') as string);
     const cipher = sjcl.encrypt(jwt, JSON.stringify(this.addEdit.password));
@@ -170,11 +198,23 @@ export default class Home extends Vue {
     const data = { ...this.addEdit };
     data.password = JSON.stringify(cipher);
 
-    const result = this.isEdit
-      ? await this.http.update('user/item', data).data
-      : await this.http.post('user/item', data).data;
+    this.eb.$emit('reset-password-toggle');
 
-    this.parseData(result);
+    try {
+      const result = this.isEdit
+        ? await this.http.put('user/item', data)
+        : await this.http.post('user/item', data);
+
+      this.parseData(result.data);
+    } catch (ex) {
+      this.eb.$emit('notify', {
+        type: 'error',
+        message: 'Something went wrong. Please try again.',
+      });
+    } finally {
+      this.isEdit = false;
+      this.addEdit = new VaultData();
+    }
   }
 
   public signOut() {
@@ -218,9 +258,16 @@ export default class Home extends Vue {
   }
 
   private async getUserData() {
-    const { data } = await this.http.get('user/data');
+    try {
+      const { data } = await this.http.get('user/data');
 
-    this.parseData(data);
+      this.parseData(data);
+    } catch (ex) {
+      this.eb.$emit('notify', {
+        type: 'error',
+        message: 'Something went wrong. Please try again.',
+      });
+    }
   }
 
   private parseData(data: ApiResponse) {
@@ -229,8 +276,10 @@ export default class Home extends Vue {
     data.data.forEach((item: any) => {
       item.password = JSON.parse(sjcl.decrypt(jwt, item.password));
 
+      item.copyStatus = '';
       item.passwordMask = '';
       item.showPassword = false;
+
       for (let i = 0; i < item.password.length; i++) { // tslint:disable-line
         item.passwordMask += '*';
       }
@@ -410,6 +459,40 @@ export default class Home extends Vue {
             display: flex;
             justify-content: space-around;
             width: 75px;
+
+            .copy-wrapper {
+              line-height: normal;
+              position: relative;
+
+              span {
+                background-color: $info;
+                border: 1px solid $purple;
+                border-radius: 5px;
+                box-shadow: 0 12px 15px 0 rgba(0, 0, 0, .22),
+                            0 17px 20px 0 rgba(0, 0, 0, .12);
+                color: $white;
+                font-size: .8rem;
+                padding: .2rem;
+                position: absolute;
+                right: -9.5rem;
+                top: -1.8rem;
+                width: 11rem;
+
+                &::before {
+                  background: #4b7ec1;
+                  border-bottom: 1px solid #757083;
+                  border-right: 1px solid #757083;
+                  bottom: -5px;
+                  content: ' ';
+                  display: block;
+                  height: 10px;
+                  left: 7px;
+                  position: absolute;
+                  transform: rotate(45deg);
+                  width: 10px;
+                }
+              }
+            }
 
             svg {
               color: $purple;

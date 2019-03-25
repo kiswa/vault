@@ -63,7 +63,6 @@ div {
     color: $purple;
     cursor: pointer;
     height: 18px;
-    fill: $purple;
     position: absolute;
     right: 4px;
     top: 4px;

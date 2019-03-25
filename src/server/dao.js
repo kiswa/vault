@@ -71,7 +71,7 @@ class DataAccessObject {
 
       response.success(data)
     } catch (err) {
-      response.data = err
+      response.alerts = [err.message]
     }
 
     return response
