@@ -29,6 +29,7 @@ export default class PasswordToggle extends Vue {
   private eb = (this as any).$eventBus;
 
   public mounted() {
+    this.eb.$off('reset-password-toggle');
     this.eb.$on('reset-password-toggle', () => {
       this.passwordType = 'password';
     });

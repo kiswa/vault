@@ -6,9 +6,7 @@
         <h1>vault</h1>
       </div>
 
-      <button @click="signOut()">
-        Sign Out
-      </button>
+      <account-edit></account-edit>
     </nav>
 
     <main>
@@ -118,12 +116,15 @@ import { Route } from 'vue-router';
 import * as sjcl from 'sjcl';
 
 import AddEdit from '@/components/AddEdit.vue';
+import AccountEdit from '@/components/AccountEdit.vue';
+
 import { VaultData } from '@/models/vault-data';
 import { ApiResponse } from '@/models/api-response';
 
 @Component({
   components: {
     AddEdit,
+    AccountEdit,
   },
 
   beforeRouteEnter: (to: Route, from: Route, next: any) => {
@@ -166,10 +167,14 @@ export default class Home extends Vue {
       document.title = `vault - ${name}`;
     }
 
+    this.eb.$off('cancel-edit');
     this.eb.$on('cancel-edit', () => {
       this.addEdit = new VaultData();
       this.isEdit = false;
     });
+
+    this.eb.$off('sign-out');
+    this.eb.$on('sign-out', this.signOut);
   }
 
   public mounted() {
