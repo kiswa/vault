@@ -225,10 +225,7 @@ export default class Home extends Vue {
         });
       });
     } catch (ex) {
-      this.eb.$emit('notify', {
-        type: 'error',
-        message: 'Something went wrong. Please try again.',
-      });
+      this.handleError(ex);
     } finally {
       this.isEdit = false;
       this.addEdit = new VaultData();
@@ -281,11 +278,26 @@ export default class Home extends Vue {
 
       this.parseData(data);
     } catch (ex) {
-      this.eb.$emit('notify', {
-        type: 'error',
-        message: 'Something went wrong. Please try again.',
-      });
+      this.handleError(ex);
     }
+  }
+
+  private handleError(err: any) {
+    if (err.response.status === 401) {
+      err.response.data.alerts.forEach((message: string) => {
+        this.eb.$emit('notify', { type: 'error', message });
+      });
+
+      localStorage.removeItem('vjwt');
+      localStorage.removeItem('name');
+
+      return;
+    }
+
+    this.eb.$emit('notify', {
+      type: 'error',
+      message: 'Something went wrong. Please try again.',
+    });
   }
 
   private parseData(response: ApiResponse) {

@@ -8,8 +8,7 @@ const vaultQuery = `SELECT vault.id, vault.product, vault.name,
                     JOIN user ON user.id = vault.user_id
                     WHERE user.id = ?`
 
-router.get('', (req, res) => {
-  const response = dao.get(`SELECT * FROM user WHERE id = ?`, [req.auth.id])
+router.put('', (req, res) => {
   const jwt = req.headers.authorization.split(' ')[1]
 
   reEncode(response.data, jwt)
@@ -54,8 +53,6 @@ router.post('/item', (req, res) => {
 router.put('/item', (req, res) => {
   const jwt = req.headers.authorization.split(' ')[1]
   const { body } = req
-
-  console.log(body)
 
   const pword = JSON.stringify(
     sjcl.encrypt(
