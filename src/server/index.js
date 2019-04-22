@@ -1,5 +1,6 @@
 const { express, SECRET } = require('./config.js')
 
+const util = require('util')
 const bodyParser = require('body-parser')
 const compression = require('compression')
 const jwtMiddleware = require('express-jwt')
@@ -19,22 +20,17 @@ app.use((_, res, next) => {
   next()
 })
 
-app.use(bodyParser.json())
-app.use(compression())
 
 app.use(jwtMiddleware({
   secret: SECRET,
   requestProperty: 'auth'
 }).unless({ path: ['/signin', '/signup'] }))
 
-app.use('/', routes)
-app.use('/user/', userRoutes)
-
-app.use((err, _, res) => {
+app.use((err, _, res, __) => {
   const errObj = {
     status: 'error',
     data: (app.get('env') === 'development') ? err : {},
-    alerts: ['Invalid Token']
+    alerts: ['Token is invalid or expired. Please sign in again.']
   }
 
   if (err.name === 'UnauthorizedError') {
@@ -44,6 +40,11 @@ app.use((err, _, res) => {
   errObj.alerts = [err.message]
   return res.status(err.status || 500).json(errObj)
 })
+app.use(bodyParser.json())
+app.use(compression())
+
+app.use('/', routes)
+app.use('/user/', userRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`)

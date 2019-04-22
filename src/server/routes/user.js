@@ -8,6 +8,14 @@ const vaultQuery = `SELECT vault.id, vault.product, vault.name,
                     JOIN user ON user.id = vault.user_id
                     WHERE user.id = ? and vault.active = 1`
 
+router.put('', (req, res) => {
+  const jwt = req.headers.authorization.split(' ')[1]
+
+  reEncode(response.data, jwt)
+
+  return res.json(response)
+})
+
 router.get('/data', (req, res) => {
   const response = dao.all(vaultQuery, req.auth.id)
   const jwt = req.headers.authorization.split(' ')[1]

@@ -24,6 +24,7 @@ export default class Notifications extends Vue {
   private notifications: Notification[] = [];
 
   public created() {
+    this.eb.$off('notify');
     this.eb.$on('notify', (data: Notification) => {
       this.notifications.push(data);
 

@@ -6,9 +6,7 @@
         <h1>vault</h1>
       </div>
 
-      <button @click="signOut()">
-        Sign Out
-      </button>
+      <account-edit></account-edit>
     </nav>
 
     <main>
@@ -34,6 +32,8 @@ import * as sjcl from 'sjcl';
 
 import AddEdit from '@/components/AddEdit.vue';
 import CredentialsList from '@/components/CredentialsList.vue';
+import AccountEdit from '@/components/AccountEdit.vue';
+
 import { VaultData } from '@/models/vault-data';
 import { ApiResponse } from '@/models/api-response';
 
@@ -41,6 +41,7 @@ import { ApiResponse } from '@/models/api-response';
   components: {
     AddEdit,
     CredentialsList,
+    AccountEdit,
   },
 
   beforeRouteEnter: (to: Route, from: Route, next: any) => {
@@ -80,10 +81,14 @@ export default class Home extends Vue {
       document.title = `vault - ${name}`;
     }
 
+    this.eb.$off('cancel-edit');
     this.eb.$on('cancel-edit', () => {
       this.addEdit = new VaultData();
       this.isEdit = false;
     });
+
+    this.eb.$off('sign-out');
+    this.eb.$on('sign-out', this.signOut);
   }
 
   public edit(item: VaultData) {
@@ -115,10 +120,7 @@ export default class Home extends Vue {
 
       this.eb.$emit('update-data', result);
     } catch (ex) {
-      this.eb.$emit('notify', {
-        type: 'error',
-        message: 'Something went wrong. Please try again.',
-      });
+      this.handleError(ex);
     } finally {
       this.isEdit = false;
       this.addEdit = new VaultData();
@@ -134,6 +136,83 @@ export default class Home extends Vue {
       message: 'You have been signed out.',
     });
     this.$router.push('/');
+  }
+
+  private sortBy(column: string) {
+    if (this.currentSort === column) {
+      this.sortDir = this.sortDir === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      this.sortDir = 'ASC';
+    }
+
+    this.currentSort = column;
+
+    this.data.sort((a, b) => {
+      const aa = (a[column] as string).toLowerCase();
+      const bb = (b[column] as string).toLowerCase();
+
+      if (this.sortDir === 'DESC') {
+        return bb > aa
+          ? 1
+          : bb < aa
+            ? -1
+            : 0;
+      }
+
+      return aa > bb
+        ? 1
+        : aa < bb
+          ? -1
+          : 0;
+    });
+  }
+
+  private async getUserData() {
+    try {
+      const { data } = await this.http.get('user/data');
+
+      this.parseData(data);
+    } catch (ex) {
+      this.handleError(ex);
+    }
+  }
+
+  private handleError(err: any) {
+    if (err.response.status === 401) {
+      err.response.data.alerts.forEach((message: string) => {
+        this.eb.$emit('notify', { type: 'error', message });
+      });
+
+      localStorage.removeItem('vjwt');
+      localStorage.removeItem('name');
+
+      return;
+    }
+
+    this.eb.$emit('notify', {
+      type: 'error',
+      message: 'Something went wrong. Please try again.',
+    });
+  }
+
+  private parseData(response: ApiResponse) {
+    const jwt = (localStorage.getItem('vjwt') as string);
+
+    response.data.forEach((item: any) => {
+      item.password = JSON.parse(sjcl.decrypt(jwt, item.password));
+
+      item.copyStatus = '';
+      item.passwordMask = '';
+      item.showPassword = false;
+
+      for (let i = 0; i < item.password.length; i++) { // tslint:disable-line
+        item.passwordMask += '*';
+      }
+    });
+
+    this.data = response.data.slice();
+    this.sortDir = 'DESC'; // For the first call, use an opposite value
+    this.sortBy('product');
   }
 }
 </script>
