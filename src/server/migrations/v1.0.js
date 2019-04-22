@@ -48,6 +48,7 @@ function up(dbPath) {
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   user_id INTEGER,
                   category_id INTEGER,
+                  active INTEGER DEFAULT 1,
                   product TEXT,
                   name TEXT,
                   password TEXT,

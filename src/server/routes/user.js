@@ -6,7 +6,7 @@ const vaultQuery = `SELECT vault.id, vault.product, vault.name,
                     vault.password, category.name AS category FROM vault
                     JOIN category ON category.id = vault.category_id
                     JOIN user ON user.id = vault.user_id
-                    WHERE user.id = ?`
+                    WHERE user.id = ? and vault.active = 1`
 
 router.get('/data', (req, res) => {
   const response = dao.all(vaultQuery, req.auth.id)
@@ -46,8 +46,6 @@ router.put('/item', (req, res) => {
   const jwt = req.headers.authorization.split(' ')[1]
   const { body } = req
 
-  console.log(body)
-
   const pword = JSON.stringify(
     sjcl.encrypt(
       SECRET, sjcl.decrypt(jwt, JSON.parse(body.password))
@@ -64,6 +62,26 @@ router.put('/item', (req, res) => {
     reEncode(response.data, jwt)
 
     response.alerts = ['Credentials updated.']
+
+    return res.json(response)
+  }
+
+  return res.json(result)
+})
+
+router.delete('/item/:id', (req, res) => {
+  const jwt = req.headers.authorization.split(' ')[1]
+
+  const result = dao.run(`UPDATE vault
+                          SET active = ?
+                          WHERE id = ?`,
+                          [0, req.params.id])
+
+  if (result.status === 'success') {
+    const response = dao.all(vaultQuery, req.auth.id)
+    reEncode(response.data, jwt)
+
+    response.alerts = ['Credentials deleted.']
 
     return res.json(response)
   }
