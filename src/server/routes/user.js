@@ -98,6 +98,10 @@ router.delete('/item/:id', (req, res) => {
 })
 
 function reEncode(items, key) {
+  if (!items.length) {
+    return
+  }
+
   items.forEach(item => {
     item.password = sjcl.encrypt(
       key, sjcl.decrypt(SECRET, JSON.parse(item.password))

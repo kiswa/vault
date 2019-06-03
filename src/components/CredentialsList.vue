@@ -76,11 +76,21 @@
         </span>
 
         <img svg-inline src="../../public/edit.svg"
-             @click="edit(item)">
+             @click="$emit('edit', item)">
 
         <img svg-inline src="../../public/delete.svg"
-             @click="deleteItem(item.id)">
+             @click="confirmDelete()">
       </div>
+    </div>
+  </div>
+
+  <div class="confirmDelete" v-if="showConfirmDelete">
+    <p>Are you sure you want to delete this item?</p>
+    <p>This cannot be undone.</p>
+
+    <div>
+      <button @click="deleteItem(item.id)">Yes</button>
+      <button @click="showConfirmDelete = false">No</button>
     </div>
   </div>
 
@@ -104,6 +114,8 @@ export default class CredentialsList extends Vue {
   private data: VaultData[] = [];
   private currentSort = 'product';
   private sortDir = 'ASC';
+
+  private showConfirmDelete = false;
 
   public created() {
     const jwt = localStorage.getItem('vjwt');
@@ -133,7 +145,11 @@ export default class CredentialsList extends Vue {
     }, 1500);
   }
 
-  public async deleteItem(itemId: number) {
+  public confirmDelete() {
+    this.showConfirmDelete = true;
+  }
+
+  private async deleteItem(itemId: number) {
     try {
       const response = await this.http.delete('user/item/' + itemId);
       const result: ApiResponse = response.data;
@@ -220,6 +236,16 @@ export default class CredentialsList extends Vue {
 
 <style lang="scss" scoped>
 @import '../variables';
+
+.confirmDelete {
+  background: $white;
+  border-radius: 3px;
+  box-shadow: 0 12px 15px 0 rgba(0, 0, 0, .22),
+              0 17px 20px 0 rgba(0, 0, 0, .12);
+  padding: 1rem;
+  position: absolute;
+  top: 2rem;
+}
 
 .display {
   padding: 1rem;

@@ -51,6 +51,7 @@ export default class AccountEdit extends Vue {
 
   private isOpen = false;
   private isPasswordChangeOpen = false;
+  private isUpdating = false;
 
   private pword = '';
   private vPword = '';
@@ -84,10 +85,6 @@ export default class AccountEdit extends Vue {
       this.errVPword = 'Passwords do not match.';
       return;
     }
-
-    this.eb.$emit('update-password', {
-      password: this.pword, verifyPassword: this.vPword,
-    });
   }
 
   public cancelChange() {

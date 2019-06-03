@@ -8,25 +8,25 @@
     <label>
       Product Name:
       <input type="text" class="partial" v-model="value.product"
-             @input="$emit('update:product', $event.target.value)" />
+             @input="emitInput('update:product', $event)" />
     </label>
 
     <label>
       Category:
       <input type="text" class="partial" v-model="value.category"
-             @input="$emit('update:category', $event.target.value)" />
+             @input="emitInput('update:category', $event)" />
     </label>
 
     <label>
       Username:
       <input type="text" class="partial" v-model="value.name"
-             @input="$emit('update:name', $event.target.value)" />
+             @input="emitInput('update:name', $event)" />
     </label>
 
     <label class="group">
       Password:
       <password-toggle class="partial" v-model="value.password"
-                       @input="$emit('update:password', $event.target.value)">
+                       @input="emitInput('update:password', $event)">
       </password-toggle>
     </label>
 
@@ -61,6 +61,12 @@ import PasswordToggle from '@/components/PasswordToggle.vue';
 })
 export default class AddEdit extends Vue {
   private eb = (this as any).$eventBus;
+
+  private emitInput(eventType: string, event: Event) {
+    if (event && event.target) {
+      this.$emit(eventType, (event.target as any).value);
+    }
+  }
 
   private cancelEdit() {
     this.eb.$emit('cancel-edit');

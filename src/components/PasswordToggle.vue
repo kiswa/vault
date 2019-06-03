@@ -1,7 +1,7 @@
 <template>
 <div>
   <input :type="passwordType" :value="value" @keyup="$emit('keyup', $event)"
-         @input="$emit('input', $event.target.value)" />
+         @input="emitInput($event)" />
 
   <a class="password-toggle" role="button" @click="togglePassword">
     <img svg-inline src="../../public/eye.svg" alt="Show Password" title="Show Password"
@@ -33,6 +33,12 @@ export default class PasswordToggle extends Vue {
     this.eb.$on('reset-password-toggle', () => {
       this.passwordType = 'password';
     });
+  }
+
+  public emitInput(event: Event) {
+    if (event && event.target) {
+      this.$emit('input', (event.target as any).value);
+    }
   }
 
   public togglePassword() {

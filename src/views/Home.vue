@@ -14,10 +14,9 @@
                 @submit="addEditItem"></add-edit>
 
       <div class="list">
-        <!-- TODO: Make component. -->
         <h2>Stored Credentials</h2>
 
-        <credentials-list></credentials-list>
+        <credentials-list @edit="edit"></credentials-list>
       </div>
     </main>
 
@@ -138,45 +137,6 @@ export default class Home extends Vue {
     this.$router.push('/');
   }
 
-  private sortBy(column: string) {
-    if (this.currentSort === column) {
-      this.sortDir = this.sortDir === 'ASC' ? 'DESC' : 'ASC';
-    } else {
-      this.sortDir = 'ASC';
-    }
-
-    this.currentSort = column;
-
-    this.data.sort((a, b) => {
-      const aa = (a[column] as string).toLowerCase();
-      const bb = (b[column] as string).toLowerCase();
-
-      if (this.sortDir === 'DESC') {
-        return bb > aa
-          ? 1
-          : bb < aa
-            ? -1
-            : 0;
-      }
-
-      return aa > bb
-        ? 1
-        : aa < bb
-          ? -1
-          : 0;
-    });
-  }
-
-  private async getUserData() {
-    try {
-      const { data } = await this.http.get('user/data');
-
-      this.parseData(data);
-    } catch (ex) {
-      this.handleError(ex);
-    }
-  }
-
   private handleError(err: any) {
     if (err.response.status === 401) {
       err.response.data.alerts.forEach((message: string) => {
@@ -193,26 +153,6 @@ export default class Home extends Vue {
       type: 'error',
       message: 'Something went wrong. Please try again.',
     });
-  }
-
-  private parseData(response: ApiResponse) {
-    const jwt = (localStorage.getItem('vjwt') as string);
-
-    response.data.forEach((item: any) => {
-      item.password = JSON.parse(sjcl.decrypt(jwt, item.password));
-
-      item.copyStatus = '';
-      item.passwordMask = '';
-      item.showPassword = false;
-
-      for (let i = 0; i < item.password.length; i++) { // tslint:disable-line
-        item.passwordMask += '*';
-      }
-    });
-
-    this.data = response.data.slice();
-    this.sortDir = 'DESC'; // For the first call, use an opposite value
-    this.sortBy('product');
   }
 }
 </script>
