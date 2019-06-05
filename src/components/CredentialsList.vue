@@ -79,18 +79,34 @@
              @click="$emit('edit', item)">
 
         <img svg-inline src="../../public/delete.svg"
-             @click="confirmDelete()">
+             @click="confirmDelete(item)">
       </div>
     </div>
   </div>
 
-  <div class="confirmDelete" v-if="showConfirmDelete">
-    <p>Are you sure you want to delete this item?</p>
-    <p>This cannot be undone.</p>
+  <div class="modal-bg" v-if="showConfirmDelete"
+       @click="showConfirmDelete = false"></div>
 
-    <div>
-      <button @click="deleteItem(item.id)">Yes</button>
-      <button @click="showConfirmDelete = false">No</button>
+  <div class="confirm-delete" tabindex="0" id="delete-modal"
+       v-show="showConfirmDelete" @keyup.esc="showConfirmDelete = false">
+    <div class="header">
+      Confirm Password Delete
+      <span @click="showConfirmDelete = false">X</span>
+    </div>
+
+    <div class="body">
+      <p>
+        The credentials for
+        <strong>{{ itemToDelete && itemToDelete.product }}</strong>
+        will be deleted.
+      </p>
+
+      <p>This cannot be undone.</p>
+    </div>
+
+    <div class="buttons">
+      <button class="danger" @click="deleteItem()">Delete</button>
+      <button @click="showConfirmDelete = false">Cancel</button>
     </div>
   </div>
 
@@ -112,6 +128,9 @@ export default class CredentialsList extends Vue {
   private eb = (this as any).$eventBus;
 
   private data: VaultData[] = [];
+  private itemToDelete: VaultData | null = null;
+  private modal: any = null;
+
   private currentSort = 'product';
   private sortDir = 'ASC';
 
@@ -128,6 +147,7 @@ export default class CredentialsList extends Vue {
 
   public mounted() {
     this.getUserData();
+    this.modal = document.getElementById('delete-modal');
   }
 
   public copy(item: any) {
@@ -137,7 +157,7 @@ export default class CredentialsList extends Vue {
       item.copyStatus = 'Copied to clipboard!';
     },
     () => {
-      item.copyStatus = 'Something went wrong.';
+      item.copyStatus = 'Something went wrong, please try again.';
     });
 
     setTimeout(() => {
@@ -145,16 +165,28 @@ export default class CredentialsList extends Vue {
     }, 1500);
   }
 
-  public confirmDelete() {
+  public confirmDelete(item: VaultData) {
+    this.itemToDelete = item;
     this.showConfirmDelete = true;
+
+    this.modal.focus();
   }
 
-  private async deleteItem(itemId: number) {
+  private async deleteItem() {
+    if (!this.itemToDelete) {
+      return;
+    }
+
     try {
-      const response = await this.http.delete('user/item/' + itemId);
+      const response = await
+        this.http.delete('user/item/' + this.itemToDelete.id);
       const result: ApiResponse = response.data;
 
       this.parseData(result);
+      this.$emit('editCancel', this.itemToDelete);
+
+      this.itemToDelete = null;
+      this.showConfirmDelete = false;
 
       result.alerts.forEach((alert) => {
         this.eb.$emit('notify', {
@@ -237,14 +269,78 @@ export default class CredentialsList extends Vue {
 <style lang="scss" scoped>
 @import '../variables';
 
-.confirmDelete {
+.modal-bg {
+  background: rgba(.5, .5, .5, .5);
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+#delete-modal {
   background: $white;
   border-radius: 3px;
   box-shadow: 0 12px 15px 0 rgba(0, 0, 0, .22),
               0 17px 20px 0 rgba(0, 0, 0, .12);
-  padding: 1rem;
   position: absolute;
   top: 2rem;
+
+  &:focus {
+    outline: none;
+  }
+
+  .header {
+    background-color: $blue;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    color: $white;
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+
+    span {
+      cursor: pointer;
+      font-weight: bold;
+    }
+  }
+
+  .body {
+    padding: 1rem;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 0 1rem 1rem;
+
+    button {
+      background-color: $white;
+      color: $purple;
+
+      &:hover {
+        background-color: darken($white, 3%);
+      }
+
+      &:active {
+        background-color: darken($white, 5%);
+      }
+
+      &.danger {
+        background-color: $error;
+        border: 1px solid darken($error, 5%);
+        color: $white;
+
+        &:hover {
+          background-color: darken($error, 3%);
+        }
+
+        &:active {
+          background-color: darken($error, 5%);
+        }
+      }
+    }
+  }
 }
 
 .display {

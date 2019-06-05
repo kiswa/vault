@@ -16,7 +16,7 @@
       <div class="list">
         <h2>Stored Credentials</h2>
 
-        <credentials-list @edit="edit"></credentials-list>
+        <credentials-list @edit="edit" @editCancel="cancelEdit"></credentials-list>
       </div>
     </main>
 
@@ -93,6 +93,15 @@ export default class Home extends Vue {
   public edit(item: VaultData) {
     this.isEdit = true;
     this.addEdit = item;
+  }
+
+  public cancelEdit(item: VaultData) {
+    if (item !== this.addEdit) {
+      return;
+    }
+
+    this.isEdit = false;
+    this.addEdit = new VaultData();
   }
 
   public async addEditItem() {
