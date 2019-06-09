@@ -1,10 +1,15 @@
 <template>
 <div class="add">
-  <h2 v-if="!isEdit">Add to your vault</h2>
+  <h2 v-if="!isEdit" @click="toggleOpen">
+    Add to your vault
+    <img src="../../public/angle-down.svg" :class="{ 'is-open': isOpen }" />
+  </h2>
 
-  <h2 v-if="isEdit">Edit credentials</h2>
+  <h2 v-if="isEdit" @click="toggleOpen">
+    Edit credentials
+  </h2>
 
-  <div class="form">
+  <div class="form" :class="{ 'is-open': isOpen || isEdit }">
     <label>
       Product Name:
       <input type="text" class="partial" v-model="value.product"
@@ -62,6 +67,12 @@ import PasswordToggle from '@/components/PasswordToggle.vue';
 export default class AddEdit extends Vue {
   private eb = (this as any).$eventBus;
 
+  private isOpen = false;
+
+  private toggleOpen() {
+    this.isOpen = !this.isOpen;
+  }
+
   private emitInput(eventType: string, event: Event) {
     if (event && event.target) {
       this.$emit(eventType, (event.target as any).value);
@@ -78,10 +89,42 @@ export default class AddEdit extends Vue {
 @import '../variables';
 
 .add {
+  h2 {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+
+    img {
+      height: 1.2rem;
+      transition: transform .2s ease;
+      width: 1.2rem;
+
+      &.is-open {
+        transform: rotate(180deg);
+      }
+
+      @media (min-width: $breakpoint-tablet + 1) {
+        display: none;
+      }
+    }
+  }
+
   .form {
     display: flex;
     flex-direction: column;
     padding: 1rem;
+
+    @media (max-width: $breakpoint-tablet) {
+      height: 0;
+      overflow: hidden;
+      padding: 0;
+      transition: all .2s ease-in-out;
+
+      &.is-open {
+        height: auto;
+        padding: 1rem;
+      }
+    }
 
     label {
       align-items: center;

@@ -7,7 +7,8 @@
   <header v-if="data.length">
     <div>
       Product
-      <span :class="{ active: currentSort === 'product',
+      <span class="sort"
+            :class="{ active: currentSort === 'product',
                       up: sortDir === 'DESC' }"
             @click="sortBy('product')">
         <i v-if="data.length > 1">
@@ -18,7 +19,8 @@
 
     <div>
       Category
-      <span :class="{ active: currentSort === 'category',
+      <span class="sort"
+            :class="{ active: currentSort === 'category',
                       up: sortDir === 'DESC' }"
             @click="sortBy('category')">
         <i v-if="data.length > 1">
@@ -29,7 +31,8 @@
 
     <div>
       Username
-      <span :class="{ active: currentSort === 'name',
+      <span class="sort"
+            :class="{ active: currentSort === 'name',
                       up: sortDir === 'DESC' }"
             @click="sortBy('name')">
         <i v-if="data.length > 1">
@@ -81,6 +84,50 @@
         <img svg-inline src="../../public/delete.svg"
              @click="confirmDelete(item)">
       </div>
+    </div>
+  </div>
+
+  <div class="mobile">
+    <div class="row" v-for="item in data" :key="item.id">
+      <div><label>Product</label> {{ item.product }}</div>
+      <div><label>Category</label> {{ item.category }}</div>
+      <div><label>Username</label> {{ item.name }}</div>
+
+      <div class="pword">
+        <label>Password</label>
+        <span :title="item.showPassword ? item.password : ''">
+          {{ item.showPassword ? item.password : item.passwordMask }}
+        </span>
+      </div>
+
+      <div class="overflow">
+        <label>Actions</label>
+        <span class="icons">
+          <img svg-inline src="../../public/eye.svg"
+                          v-if="!item.showPassword"
+                          @click="item.showPassword = !item.showPassword">
+
+          <img svg-inline src="../../public/eye-line.svg"
+                          v-if="item.showPassword"
+                          @click="item.showPassword = !item.showPassword">
+
+          <span class="copy-wrapper">
+            <img svg-inline src="../../public/copy.svg"
+                            @click="copy(item)">
+
+            <span v-if="item.copyStatus.length">
+              {{ item.copyStatus }}
+            </span>
+          </span>
+
+          <img svg-inline src="../../public/edit.svg"
+                          @click="$emit('edit', item)">
+
+          <img svg-inline src="../../public/delete.svg"
+                          @click="confirmDelete(item)">
+        </span>
+      </div>
+
     </div>
   </div>
 
@@ -283,8 +330,10 @@ export default class CredentialsList extends Vue {
   border-radius: 3px;
   box-shadow: 0 12px 15px 0 rgba(0, 0, 0, .22),
               0 17px 20px 0 rgba(0, 0, 0, .12);
+  left: calc(50% - 10rem);
   position: absolute;
   top: 2rem;
+  width: 20rem;
 
   &:focus {
     outline: none;
@@ -346,10 +395,40 @@ export default class CredentialsList extends Vue {
 .display {
   padding: 1rem;
 
+  .mobile {
+    display: none;
+
+    @media (max-width: $breakpoint-mobile) {
+      display: block;
+
+      .row {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+
+        &:last-of-type {
+          margin-bottom: 0;
+        }
+
+        label {
+          font-weight: bold;
+        }
+
+        .overflow {
+          overflow: visible;
+        }
+      }
+    }
+  }
+
   header,
   .row {
     display: flex;
     justify-content: space-around;
+
+    @media (max-width: $breakpoint-mobile) {
+      display: none;
+    }
 
     div {
       display: flex;
@@ -363,7 +442,7 @@ export default class CredentialsList extends Vue {
         margin-right: 0;
       }
 
-      span {
+      .sort {
         color: lighten($grey, 25%);
         width: 32px;
 
@@ -417,7 +496,12 @@ export default class CredentialsList extends Vue {
     display: flex;
     flex: .5!important;
     justify-content: space-around;
+    min-width: 5rem;
     overflow: visible!important;
+
+    @media (max-width: $breakpoint-tablet) {
+      min-width: 7rem;
+    }
 
     .copy-wrapper {
       line-height: normal;
@@ -438,6 +522,14 @@ export default class CredentialsList extends Vue {
         top: -1.8rem;
         width: 11rem;
 
+        @media (max-width: $breakpoint-tablet) {
+          right: -5.5rem;
+        }
+
+        @media (max-width: $breakpoint-mobile-small) {
+          right: -4.5rem;
+        }
+
         &::before {
           background: #4b7ec1;
           border-bottom: 1px solid #757083;
@@ -450,6 +542,14 @@ export default class CredentialsList extends Vue {
           position: absolute;
           transform: rotate(45deg);
           width: 10px;
+
+          @media (max-width: $breakpoint-tablet) {
+            left: 77px;
+          }
+
+          @media (max-width: $breakpoint-mobile-small) {
+            left: 92px;
+          }
         }
       }
     }

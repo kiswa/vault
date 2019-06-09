@@ -2,7 +2,7 @@
   <div class="container">
     <nav>
       <div class="logo">
-        <img src="logo.svg">
+        <img svg-inline src="../../public/logo.svg">
         <h1>vault</h1>
       </div>
 
@@ -182,6 +182,10 @@ export default class Home extends Vue {
     h1 {
       font-size: 2.5rem;
       margin-left: -1rem;
+
+      @media (max-width: $breakpoint-mobile-small) {
+        font-size: 2rem;
+      }
     }
 
     .logo {
@@ -216,6 +220,11 @@ export default class Home extends Vue {
     display: flex;
     justify-content: space-between;
     margin: 2rem 0;
+
+    @media (max-width: $breakpoint-tablet) {
+      align-items: stretch;
+      flex-direction: column;
+    }
 
     button,
     input {
@@ -267,6 +276,10 @@ export default class Home extends Vue {
     .list {
       flex: 1;
       margin-left: 1rem;
+
+      @media (max-width: $breakpoint-tablet) {
+        margin-left: 0;
+      }
     }
 
   }
