@@ -1,6 +1,5 @@
 const { express, SECRET } = require('./config.js')
 
-const util = require('util')
 const bodyParser = require('body-parser')
 const compression = require('compression')
 const jwtMiddleware = require('express-jwt')
