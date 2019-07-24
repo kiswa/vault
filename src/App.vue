@@ -43,6 +43,7 @@ body {
                               lighten($blue, 3%) 0%,
                               $blue 35%,
                               darken($blue, 7%) 100%);
+  background-attachment: fixed;
   color: $black;
 }
 
