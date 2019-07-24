@@ -1,52 +1,59 @@
 <template>
-<div class="add">
-  <h2 v-if="!isEdit" @click="toggleOpen">
-    Add to your vault
-    <img src="../../public/angle-down.svg" :class="{ 'is-open': isOpen }" />
-  </h2>
+  <div class="add">
+    <h2 v-if="!isEdit" @click="toggleOpen">
+      Add to your vault
+      <img src="../../public/angle-down.svg" :class="{ 'is-open': isOpen }" />
+    </h2>
 
-  <h2 v-if="isEdit" @click="toggleOpen">
-    Edit credentials
-  </h2>
+    <h2 v-if="isEdit" @click="toggleOpen">
+      Edit credentials
+    </h2>
 
-  <div class="form" :class="{ 'is-open': isOpen || isEdit }">
-    <label>
-      Product Name:
-      <input type="text" class="partial" v-model="value.product"
-             @input="emitInput('update:product', $event)" />
-    </label>
+    <div class="form" :class="{ 'is-open': isOpen || isEdit }">
+      <label>
+        Product Name:
+        <input type="text"
+               class="partial"
+               v-model="value.product"
+               @input="emitInput('update:product', $event)" />
+      </label>
 
-    <label>
-      Category:
-      <input type="text" class="partial" v-model="value.category"
-             @input="emitInput('update:category', $event)" />
-    </label>
+      <label>
+        Category:
+        <input type="text"
+               class="partial"
+               v-model="value.category"
+               @input="emitInput('update:category', $event)" />
+      </label>
 
-    <label>
-      Username:
-      <input type="text" class="partial" v-model="value.name"
-             @input="emitInput('update:name', $event)" />
-    </label>
+      <label>
+        Username:
+        <input type="text" readonly
+               class="partial readonly"
+               v-model="value.name"
+               @input="emitInput('update:name', $event)" />
+      </label>
 
-    <label class="group">
-      Password:
-      <password-toggle class="partial" v-model="value.password"
-                       @input="emitInput('update:password', $event)">
-      </password-toggle>
-    </label>
+      <label class="group">
+        Password:
+        <password-toggle class="partial readonly" readonly
+                         v-model="value.password"
+                         @input="emitInput('update:password', $event)">
+        </password-toggle>
+      </label>
 
-    <div>
-      <button @click="$emit('submit')">
-        {{ isEdit ? 'Save' : 'Add' }}
-      </button>
+      <div>
+        <button @click="$emit('submit')">
+          {{ isEdit ? 'Save' : 'Add' }}
+        </button>
 
-      <button @click="cancelEdit" v-if="isEdit" class="cancel">
-        Cancel
-      </button>
+        <button @click="cancelEdit" v-if="isEdit" class="cancel">
+          Cancel
+        </button>
+      </div>
+
     </div>
-
   </div>
-</div>
 </template>
 
 <script lang="ts">
@@ -63,6 +70,16 @@ import PasswordToggle from '@/components/PasswordToggle.vue';
     'value',
     'isEdit',
   ],
+
+  mounted: () => {
+    const readonlyEls = document.getElementsByClassName('readonly');
+
+    setTimeout(() => {
+      Array.from(readonlyEls).forEach((el) => {
+        el.removeAttribute('readonly');
+      });
+    }, 500);
+  },
 })
 export default class AddEdit extends Vue {
   private eb = (this as any).$eventBus;
