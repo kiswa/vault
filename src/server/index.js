@@ -19,7 +19,6 @@ app.use((_, res, next) => {
   next()
 })
 
-
 app.use(jwtMiddleware({
   secret: SECRET,
   requestProperty: 'auth'

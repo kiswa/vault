@@ -57,21 +57,28 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Prop } from 'vue-property-decorator';
 
 import PasswordToggle from '@/components/PasswordToggle.vue';
+import { VaultData } from '@/models/vault-data';
 
 @Component({
   components: {
     PasswordToggle,
   },
+})
+export default class AddEdit extends Vue {
+  private eb = (this as any).$eventBus;
 
-  props: [
-    'value',
-    'isEdit',
-  ],
+  private isOpen = false;
 
-  mounted: () => {
+  @Prop({ required: true, default: new VaultData() })
+  private value!: VaultData;
+
+  @Prop({ required: true, default: false })
+  private isEdit!: boolean;
+
+  public mounted() {
     const readonlyEls = document.getElementsByClassName('readonly');
 
     setTimeout(() => {
@@ -79,12 +86,7 @@ import PasswordToggle from '@/components/PasswordToggle.vue';
         el.removeAttribute('readonly');
       });
     }, 500);
-  },
-})
-export default class AddEdit extends Vue {
-  private eb = (this as any).$eventBus;
-
-  private isOpen = false;
+  }
 
   private toggleOpen() {
     this.isOpen = !this.isOpen;

@@ -16,7 +16,8 @@
       <div class="list">
         <h2>Stored Credentials</h2>
 
-        <credentials-list @edit="edit" @editCancel="cancelEdit"></credentials-list>
+        <credentials-list @edit="edit" @editCancel="cancelEdit">
+        </credentials-list>
       </div>
     </main>
 
@@ -121,7 +122,7 @@ export default class Home extends Vue {
 
       result.alerts.forEach((alert) => {
         this.eb.$emit('notify', {
-          type: 'success',
+          type: result.status,
           message: alert,
         });
       });

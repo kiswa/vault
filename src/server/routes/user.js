@@ -1,12 +1,13 @@
 const sjcl = require('sjcl')
 
-const { router, path, dao, ApiResponse, SECRET } = require('../config.js')
+const { router, dao, SECRET } = require('../config.js')
 
 const vaultQuery = `SELECT vault.id, vault.product, vault.name,
                     vault.password, category.name AS category FROM vault
                     JOIN category ON category.id = vault.category_id
                     JOIN user ON user.id = vault.user_id
-                    WHERE user.id = ? and vault.active = 1`
+                    WHERE user.id = ? and vault.active = 1
+                    ORDER BY vault.product`
 
 router.put('', (req, res) => {
   const jwt = req.headers.authorization.split(' ')[1]
@@ -59,22 +60,26 @@ router.put('/item', (req, res) => {
       SECRET, sjcl.decrypt(jwt, JSON.parse(body.password))
     )
   )
+  const catId = getCategoryId(body.category)
 
   const result = dao.run(`UPDATE vault
-                          SET product = ?, name = ?, password = ?
+                          SET product = ?,
+                            category_id = ?,
+                            name = ?,
+                            password = ?
                           WHERE id = ?`,
-                          [body.product, body.name, pword, body.id])
+                          [body.product, catId, body.name, pword, body.id])
 
-  if (result.status === 'success') {
-    const response = dao.all(vaultQuery, req.auth.id)
-    reEncode(response.data, jwt)
-
-    response.alerts = ['Credentials updated.']
-
-    return res.json(response)
+  if (result.status === 'error') {
+    return res.json(result)
   }
 
-  return res.json(result)
+  const response = dao.all(vaultQuery, req.auth.id)
+  reEncode(response.data, jwt)
+
+  response.alerts = ['Credentials updated.']
+
+  return res.json(response)
 })
 
 router.delete('/item/:id', (req, res) => {

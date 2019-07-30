@@ -5,39 +5,61 @@
   </div>
 
   <header v-if="data.length">
-    <div>
+    <div class="header">
       Product
-      <span class="sort"
-            :class="{ active: currentSort === 'product',
-                      up: sortDir === 'DESC' }"
-            @click="sortBy('product')">
-        <i v-if="data.length > 1">
-          <img svg-inline src="../../public/angle-down.svg" />
-        </i>
+
+      <span class="header-controls">
+        <filter-input placeholder='Filter by product'
+                      @filter-input="filterData($event, 'product')">
+        </filter-input>
+
+        <span class="sort"
+              :class="{ active: currentSort === 'product',
+              up: sortDir === 'DESC' }"
+              @click="sortBy('product')">
+
+          <i v-if="data.length > 1">
+            <img svg-inline src="../../public/angle-down.svg" />
+          </i>
+        </span>
       </span>
     </div>
 
-    <div>
+    <div class="header">
       Category
-      <span class="sort"
-            :class="{ active: currentSort === 'category',
-                      up: sortDir === 'DESC' }"
-            @click="sortBy('category')">
-        <i v-if="data.length > 1">
-          <img svg-inline src="../../public/angle-down.svg" />
-        </i>
+
+      <span class="header-controls">
+        <filter-input placeholder='Filter by category'
+                      @filter-input="filterData($event, 'category')">
+        </filter-input>
+
+        <span class="sort"
+              :class="{ active: currentSort === 'category',
+              up: sortDir === 'DESC' }"
+              @click="sortBy('category')">
+          <i v-if="data.length > 1">
+            <img svg-inline src="../../public/angle-down.svg" />
+          </i>
+        </span>
       </span>
     </div>
 
-    <div>
+    <div class="header">
       Username
-      <span class="sort"
-            :class="{ active: currentSort === 'name',
-                      up: sortDir === 'DESC' }"
-            @click="sortBy('name')">
-        <i v-if="data.length > 1">
-          <img svg-inline src="../../public/angle-down.svg" />
-        </i>
+
+      <span class="header-controls">
+        <filter-input placeholder='Filter by username'
+                      @filter-input="filterData($event, 'name')">
+        </filter-input>
+
+        <span class="sort"
+              :class="{ active: currentSort === 'name',
+              up: sortDir === 'DESC' }"
+              @click="sortBy('name')">
+          <i v-if="data.length > 1">
+            <img svg-inline src="../../public/angle-down.svg" />
+          </i>
+        </span>
       </span>
     </div>
 
@@ -47,7 +69,7 @@
   </header>
 
   <div class="body">
-    <div class="row" v-for="item in data" :key="item.id">
+    <div class="row" v-for="item in filteredData" :key="item.id">
       <div>{{ item.product }}</div>
 
       <div>{{ item.category }}</div>
@@ -63,11 +85,11 @@
       <div class="icons">
         <img svg-inline src="../../public/eye.svg"
              v-if="!item.showPassword"
-             @click="item.showPassword = !item.showPassword">
+             @click="toggleShowPassword(item)">
 
         <img svg-inline src="../../public/eye-line.svg"
              v-if="item.showPassword"
-             @click="item.showPassword = !item.showPassword">
+             @click="toggleShowPassword(item)">
 
         <span class="copy-wrapper">
           <img svg-inline src="../../public/copy.svg"
@@ -105,11 +127,11 @@
         <span class="icons">
           <img svg-inline src="../../public/eye.svg"
                           v-if="!item.showPassword"
-                          @click="item.showPassword = !item.showPassword">
+                          @click="toggleShowPassword(item)">
 
           <img svg-inline src="../../public/eye-line.svg"
                           v-if="item.showPassword"
-                          @click="item.showPassword = !item.showPassword">
+                          @click="toggleShowPassword(item)">
 
           <span class="copy-wrapper">
             <img svg-inline src="../../public/copy.svg"
@@ -142,13 +164,13 @@
     </div>
 
     <div class="body">
-      <p>
+      <p class="left">
         The credentials for
         <strong>{{ itemToDelete && itemToDelete.product }}</strong>
         will be deleted.
       </p>
 
-      <p>This cannot be undone.</p>
+      <p><strong>This cannot be undone.</strong></p>
     </div>
 
     <div class="buttons">
@@ -165,16 +187,23 @@ import { Component, Vue } from 'vue-property-decorator';
 import { Route } from 'vue-router';
 
 import * as sjcl from 'sjcl';
+import * as clipboard from 'clipboard-polyfill';
 
+import FilterInput from '@/components/FilterInput.vue';
 import { VaultData } from '@/models/vault-data';
 import { ApiResponse } from '@/models/api-response';
 
-@Component({})
+@Component({
+  components: {
+    FilterInput,
+  },
+})
 export default class CredentialsList extends Vue {
   private http = (this as any).$http;
   private eb = (this as any).$eventBus;
 
   private data: VaultData[] = [];
+  private filteredData: VaultData[] = [];
   private itemToDelete: VaultData | null = null;
   private modal: any = null;
 
@@ -198,9 +227,7 @@ export default class CredentialsList extends Vue {
   }
 
   public copy(item: any) {
-    const nav = (navigator as any);
-
-    nav.clipboard.writeText(item.password).then(() => {
+    clipboard.writeText(item.password).then(() => {
       item.copyStatus = 'Copied to clipboard!';
     },
     () => {
@@ -217,6 +244,26 @@ export default class CredentialsList extends Vue {
     this.showConfirmDelete = true;
 
     this.modal.focus();
+  }
+
+  private filterData(event: string, column: string) {
+    const filter = event.toLowerCase();
+    const isEmpty = event === '';
+
+    this.filteredData = [];
+
+    this.data.forEach((item) => {
+      const value = item[column].toLowerCase();
+      const hasFilter = value.indexOf(filter) >= 0;
+
+      if (hasFilter || isEmpty) {
+        this.filteredData.push(item);
+      }
+    });
+  }
+
+  private toggleShowPassword(item: any) {
+    item.showPassword = !item.showPassword;
   }
 
   private async deleteItem() {
@@ -258,7 +305,7 @@ export default class CredentialsList extends Vue {
 
     this.currentSort = column;
 
-    this.data.sort((a, b) => {
+    this.filteredData.sort((a, b) => {
       const aa = (a[column] as string).toLowerCase();
       const bb = (b[column] as string).toLowerCase();
 
@@ -301,14 +348,16 @@ export default class CredentialsList extends Vue {
       item.passwordMask = '';
       item.showPassword = false;
 
-      for (let i = 0; i < item.password.length; i++) { // tslint:disable-line
+      for (const char of item.password) {
         item.passwordMask += '*';
       }
     });
 
     this.data = response.data.slice();
-    this.sortDir = 'DESC'; // For the first call, use an opposite value
-    this.sortBy('product');
+    this.filterData('', 'product');
+    // For the first call, use an opposite value
+    this.sortDir = this.sortDir === 'ASC' ? 'DESC' : 'ASC';
+    this.sortBy(this.currentSort);
   }
 }
 </script>
@@ -437,6 +486,7 @@ export default class CredentialsList extends Vue {
       line-height: 2;
       margin-right: .5rem;
       overflow: hidden;
+      text-align: left;
 
       &:last-of-type {
         margin-right: 0;
@@ -444,7 +494,6 @@ export default class CredentialsList extends Vue {
 
       .sort {
         color: lighten($grey, 25%);
-        width: 32px;
 
         &.active {
           color: $black;
@@ -467,6 +516,20 @@ export default class CredentialsList extends Vue {
 
   header {
     font-weight: bold;
+    overflow: visible;
+
+    .header {
+      overflow: visible;
+      position: relative;
+    }
+
+    .header-controls {
+      display: flex;
+
+      .sort {
+        margin-left: .3rem;
+      }
+    }
   }
 
   .row:nth-of-type(even) {
@@ -517,17 +580,18 @@ export default class CredentialsList extends Vue {
         color: $white;
         font-size: .8rem;
         padding: .2rem;
+        padding-left: .5rem;
         position: absolute;
-        right: -9.5rem;
+        right: -7.5rem;
         top: -1.8rem;
-        width: 11rem;
+        width: 9rem;
 
         @media (max-width: $breakpoint-tablet) {
-          right: -5.5rem;
+          right: -3.5rem;
         }
 
         @media (max-width: $breakpoint-mobile-small) {
-          right: -4.5rem;
+          right: -2.5rem;
         }
 
         &::before {
