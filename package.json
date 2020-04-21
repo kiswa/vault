@@ -6,7 +6,6 @@
     "start": "vue-cli-service serve --host localhost",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test": "vue-cli-service test:unit",
     "server": "forever src/server/",
     "server:dev": "nodemon -w src/server src/server/index.js"
   },
