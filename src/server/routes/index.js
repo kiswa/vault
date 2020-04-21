@@ -1,5 +1,5 @@
 const {
-  router, path, dao, ApiResponse, jwt, bcrypt, saltRounds, SECRET
+  router, dao, ApiResponse, jwt, bcrypt, saltRounds, SECRET
 } = require('../config.js')
 
 router.post('/auth', (_, res) => {
