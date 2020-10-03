@@ -21,7 +21,8 @@ app.use((_, res, next) => {
 
 app.use(jwtMiddleware({
   secret: SECRET,
-  requestProperty: 'auth'
+  requestProperty: 'auth',
+  algorithms: ['HS512']
 }).unless({ path: ['/signin', '/signup'] }))
 
 app.use((err, _, res, __) => {

@@ -444,6 +444,11 @@ export default class CredentialsList extends Vue {
 .display {
   padding: 1rem;
 
+  @media (max-width: $breakpoint-mobile) {
+    height: calc(100vh - 250px);
+    overflow: auto;
+  }
+
   .mobile {
     display: none;
 

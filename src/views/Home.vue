@@ -180,6 +180,14 @@ export default class Home extends Vue {
     height: 4rem;
     justify-content: space-between;
 
+    @media (max-width: $breakpoint-mobile) {
+      left: 0;
+      position: fixed;
+      right: 22px;
+      top: 1rem;
+      z-index: 100;
+    }
+
     h1 {
       font-size: 2.5rem;
       margin-left: -1rem;
@@ -225,6 +233,13 @@ export default class Home extends Vue {
     @media (max-width: $breakpoint-tablet) {
       align-items: stretch;
       flex-direction: column;
+    }
+
+    @media (max-width: $breakpoint-mobile) {
+      left: 22px;
+      position: fixed;
+      right: 22px;
+      top: 64px;
     }
 
     button,

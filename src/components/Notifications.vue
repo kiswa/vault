@@ -57,6 +57,12 @@ export default class Notifications extends Vue {
   position: fixed;
   right: -20px;
   top: 0;
+  z-index: 1000;
+
+  @media (max-width: $breakpoint-mobile) {
+    border-radius: 5px;
+    right: 0;
+  }
 
   .collapse-enter-active,
   .collapse-leave-active {
@@ -74,7 +80,6 @@ export default class Notifications extends Vue {
     opacity: 1;
     transform: rotateX(0deg);
   }
-
 }
 
 .note {
@@ -85,9 +90,12 @@ export default class Notifications extends Vue {
               0 17px 20px 0 rgba(0, 0, 0, .12);
   cursor: pointer;
   margin-bottom: .5rem;
-  max-width: 100%;
   text-align: left;
   width: 30rem;
+
+  @media (max-width: $breakpoint-mobile) {
+    width: calc(100vw - 22px);
+  }
 
   header {
     border-bottom: 1px solid lighten($black, 30%);
